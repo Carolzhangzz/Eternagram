@@ -115,21 +115,50 @@ const config = {
 
 
 
-// console.log(process.env.OPENAI_API_KEY);
 
 const App = () => {
-  const [inputText, setInputText] = useState('');
-  const [generatedText, setGeneratedText] = useState('');
+  //new ChatGPT API
+  // const apiKey = "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";
+  // const data = {
+  //   model: 'text-davinci-003',
+  //   prompt: 'Say this is a test',
+  //   temperature: 0,
+  //   max_tokens: 1000
+  // };
+  // const headers = {
+  //   'Content-Type': 'application/json',
+  //   'Authorization': `Bearer ${apiKey}`
+  // };
+  // const url = 'https://api.openai.com/v1/completions';
 
+  
 
-  async function generateText() {
+  const [prompt, setPrompt] = useState('Say this is a test');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const apiKey = "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";
+    const data = {
+      model: 'text-davinci-003',
+      prompt,
+      temperature: 0,
+      max_tokens: 1000
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    };
+    const url = 'https://api.openai.com/v1/completions';
+
     try {
-      const response = await axios.post('/api/generate-text', { inputText });
-      setGeneratedText(response.data.generatedText);
+      const response = await axios.post(url, data, { headers });
+      console.log(response.data);
+      setMessage(response.data.choices[0].text);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
 
   return (
@@ -138,16 +167,25 @@ const App = () => {
         bubbleOptionStyle={{ backgroundColor: "white", color: "black" }}
         steps={step}
       />
+
       <div>
-        <form onSubmit={(event) => { event.preventDefault(); generateText(); }}>
+        <form onSubmit={handleSubmit}>
           <label>
-            Enter a prompt:
-            <input type="text" value={inputText} onChange={(event) => setInputText(event.target.value)} />
+            Prompt:
+            <input type="text" value={prompt} onChange={(event) => setPrompt(event.target.value)} />
           </label>
-          <button type="submit">Generate text</button>
+          <button type="submit">Submit</button>
         </form>
-        <p>Generated text: {generatedText}</p>
+        {message && (
+          <div>
+            <h2>Response:</h2>
+            <p>{message}</p>
+          </div>
+        )}
       </div>
+
+
+
     </div>
   );
 };
