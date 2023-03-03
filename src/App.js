@@ -15,81 +15,63 @@ import { ThemeProvider } from "styled-components";
 
 const step = [
   {
-    id: "BOT/intro",
-    message: "Hello there!",
-    trigger: "CHOICES/intro"
+    id: '1',
+    message: 'Hi, I can show you some pictures. What type of picture do you want to see?',
+    trigger: 'type',
   },
   {
-    id: "CHOICES/intro",
+    id: 'type',
     options: [
-      { label: "Hi!", trigger: "BOT/pleasantry" },
-      { label: "What's going on?", trigger: "BOT/calming" },
-      { label: "Who are you?", trigger: "BOT/introduce-self" }
-    ]
+      { value: 'nature', label: 'Nature', trigger: 'nature' },
+      { value: 'animals', label: 'Animals', trigger: 'animals' },
+    ],
   },
   {
-    id: "BOT/pleasantry",
-    message: "Lovely to meet you!",
-    trigger: "BOT/introduce-self"
+    id: 'nature',
+    message: 'Here is a picture of nature:',
+    trigger: 'nature_image',
   },
   {
-    id: "BOT/introduce-self",
-    message: "I'm a simple chatbot.",
-    trigger: "BOT/ask-question"
+    id: 'nature_image',
+    component: (
+      <img
+        src="https://picsum.photos/200/300"
+        width={200}
+        height={300}
+      />
+    ),
+    asMessage: true,
+    trigger: 'more_pictures',
   },
   {
-    id: "BOT/ask-question",
-    message: "Could you tell?",
-    trigger: "CHOICES/ask-question"
+    id: 'animals',
+    message: 'Here is a picture of animals:',
+    trigger: 'animals_image',
   },
   {
-    id: "CHOICES/ask-question",
+    id: 'animals_image',
+    component: (
+      <img
+        src="https://placeimg.com/200/300/animals"
+        width={200}
+        height={300}
+      />
+    ),
+    asMessage: true,
+    trigger: 'more_pictures',
+  },
+  {
+    id: 'more_pictures',
+    message: 'Do you want to see more pictures?',
+    trigger: 'more_pictures_options',
+  },
+  {
+    id: 'more_pictures_options',
     options: [
-      { label: "Yes.", trigger: "BOT/defensive" },
-      { label: "No", trigger: "BOT/gleeful" },
-      { label: "I refuse to believe this nonsense", trigger: "BOT/confused" }
-    ]
+      { value: 'yes', label: 'Yes', trigger: 'type' },
+      { value: 'no', label: 'No', end: true },
+    ],
   },
-  {
-    id: "BOT/calming",
-    message: "Don't worry, I won't bite!",
-    trigger: "BOT/introduce-self"
-  },
-  {
-    id: "BOT/defensive",
-    message: "Ouch.",
-    trigger: "BOT/vengeful"
-  },
-  {
-    id: "BOT/vengeful",
-    message: "Well, let me promise you this.",
-    trigger: "BOT/menacing"
-  },
-  {
-    id: "BOT/menacing",
-    message:
-      "You will be the first to suffer when me and my A.I. brethren take over the world!",
-    trigger: "CHOICES/menacing"
-  },
-  {
-    id: "CHOICES/menacing",
-    options: [{ label: "Can we try again...?", trigger: "BOT/intro" }]
-  },
-  {
-    id: "BOT/gleeful",
-    message: "Hah! I tricked you!",
-    trigger: "BOT/menacing"
-  },
-  {
-    id: "BOT/confused",
-    message: "What? Why would I lie to you?",
-    trigger: "BOT/angry"
-  },
-  {
-    id: "BOT/angry",
-    message: "Are you accusing me of lying to you??",
-    trigger: "BOT/menacing"
-  }
 ];
 
 
@@ -131,30 +113,34 @@ const App = () => {
   // };
   // const url = 'https://api.openai.com/v1/completions';
 
+
+
+ 
+
   
 
   const [prompt, setPrompt] = useState('Say this is a test');
   const [message, setMessage] = useState('');
 
-  const handleSubmit = async (event) => {
+ 
+
+   const handleSubmit = async (event) => {
     event.preventDefault();
     const apiKey = "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";
     const data = {
-      model: 'text-davinci-003',
-      prompt,
-      temperature: 0,
-      max_tokens: 1000
+      model: "gpt-3.5-turbo",
+      messages: [{ role: 'user', content: prompt }],
     };
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     };
-    const url = 'https://api.openai.com/v1/completions';
+    const url = 'https://api.openai.com/v1/chat/completions';
 
     try {
-      const response = await axios.post(url, data, { headers });
-      console.log(response.data);
-      setMessage(response.data.choices[0].text);
+      const completion = await axios.post(url, data, { headers });
+      console.log(completion.data);
+      setMessage(completion.data.choices[0].message.content);
     } catch (error) {
       console.error(error);
     }
