@@ -139,7 +139,6 @@ def load_file_from_gcs(bucket_name, filepath):
 # Load .env file from Google Cloud Storage
 env_file_content = load_file_from_gcs('ryno-v2', 'keys/.env')
 env_file = {line.split('=')[0]: line.split('=')[1] for line in env_file_content.split('\n') if line}
-print(env_file)
 
 # CloudStorage initialisation
 storage = CloudStorage('ryno-v2', os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
