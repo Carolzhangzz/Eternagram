@@ -1,24 +1,49 @@
 import './App.css';
 import React, { useState } from 'react';
-import axios from "axios";
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 
 
 
 const App = () => {
- 
-  const [count, setCount] = useState(0);
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState([
     {
       message: "Hello, I am ChatGPT! Please ask me anything.",
       sender: "ChatGPT",
       direction: "ingoing",
-
     },
- 
+    {
+      message: "This is a testing message👌. <img src={logo} alt='Logo' />",
+      sender: "ChatGPT",
+      direction: "ingoing",
+    },
   ]);
+
+  //Added the API constants
+  const [userId, setUserId] = useState('');
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+
+
+
+  //Code for handling submit to API
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, message: message }),
+    };
+
+    const apiResponse = await fetch('https://ryno-v2-cedo4cgxka-de.a.run.app/chat', requestOptions);
+    const data = await apiResponse.json();
+    setResponse(data.response);
+  };
+
+
+
 
 
   const handleSend = async (message) => {
@@ -101,8 +126,7 @@ const App = () => {
   return (
     <div>
 
-      <div style={{ position: "relative", height: "800px", width: "700px" }}>
-
+      <div style={{ position: "relative", height: "600px", width: "500px" }}>
         <MainContainer>
           <ChatContainer>
             <MessageList typingIndicator={typing ? <TypingIndicator content="ChatGPT is typing" /> : null}>
@@ -113,8 +137,26 @@ const App = () => {
             <MessageInput placeholder='Type message here' onSend={handleSend} />
           </ChatContainer>
         </MainContainer>
-
       </div>
+
+
+      <div>
+        <form onSubmit={handleSubmit}>
+          <label>
+            User ID:
+            <input type="text" value={userId} onChange={(e) => setUserId(e.target.value)} />
+          </label>
+          <br />
+          <label>
+            Message:
+            <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} />
+          </label>
+          <br />
+          <input type="submit" value="Submit" />
+        </form>
+        <p>Response: {response}</p>
+      </div>
+
 
     </div>
   );
