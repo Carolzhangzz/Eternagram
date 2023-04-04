@@ -1,0 +1,9 @@
+google-cloud-storage
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+openai
+python-dotenv
+fastapi
+uvicorn
+pydantic
