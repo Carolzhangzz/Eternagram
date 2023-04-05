@@ -5,11 +5,23 @@ from numpy.linalg import norm
 import re
 import hashlib
 
+import requests
+import pdfplumber
+from io import BytesIO
+
 # Google Cloud Storage Libraries
 from google.cloud import storage as google_storage
 from google.oauth2.service_account import Credentials
 from google.oauth2 import service_account
 from google.auth import default
+
+# LangChain library
+from langchain.document_loaders import UnstructuredPDFLoader, OnlinePDFLoader, TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma, Pinecone
+from langchain.llms import OpenAI
+from langchain.chains.question_answering import load_qa_chain
 
 import openai
 import pinecone
@@ -48,6 +60,11 @@ class CloudStorage:
     def open_file(self, filepath):
         blob = self.bucket.blob(filepath)
         return blob.download_as_string().decode()
+    
+    # Open binary file from Google Cloud Storage
+    def open_binary_file(self, filepath):
+        blob = self.bucket.blob(filepath)
+        return blob.download_as_bytes()
 
     # Save text file to Google Cloud Storage
     def save_file(self, filepath, payload):
@@ -70,8 +87,8 @@ class OpenAI:
             print(f"Error: {e}")
             return None
 
-    # Setup GPT-3.5 completion
-    def gpt3_completion(self, prompt, user_id, model='gpt-4', temp=0.7, top_p=0.8, tokens=400, freq_pen=0.0, pres_pen=0.0, stop=['You:', 'Ryno:']):
+    # Setup GPT-4 completion
+    def gpt4_completion(self, prompt, user_id, model='gpt-4', temp=0.7, top_p=0.8, tokens=200, freq_pen=0.0, pres_pen=0.0, stop=['You:', 'Ryno:']):
         max_retry = 5
         retry = 0
         prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
@@ -104,7 +121,12 @@ class OpenAI:
                 print('Error communicating with OpenAI:', oops)
                 sleep(1)
 
-
+# Class to return page_contents of large corpus PDFs
+class Page:
+    def __init__(self, page_content, metadata=None):
+        self.page_content = page_content
+        self.metadata = metadata if metadata is not None else {}
+    
 # Convert timestamp to datetime
 def timestamp_to_datetime(unix_time):
     return datetime.datetime.fromtimestamp(unix_time).strftime("%A, %B %d, %Y at %I:%M%p %Z")
@@ -155,8 +177,30 @@ pinecone_api_key = env_file['REACT_APP_PINECONE_API_KEY '].strip(" '")
 pinecone.init(api_key= pinecone_api_key, environment="us-east1-gcp")
 vdb = pinecone.Index("ryno-version2")
 
+# Set up Pinecone API for knowledge base
+pinecone_api_key_data = env_file['PINECONE_API_KEY_DATA '].strip(" '")
+
+# Load PDF data
+file_name = "Climate Change Game.pdf"
+pdf_data = storage.open_binary_file(file_name)
+with pdfplumber.open(BytesIO(pdf_data)) as pdf:
+    # Extract text from each page and create Page objects
+    data = [Page(page.extract_text()) for page in pdf.pages]
+
+# Chunk data into smaller documents
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=20, separators=['\n\n', '\n', ' ', ''])
+texts = text_splitter.split_documents(data)
+
+# Initialize pinecone and embeddings
+pinecone.init(api_key=pinecone_api_key_data, environment="us-east1-gcp")
+index_name = "climate-change-game"
+embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key)
+
+# Passing the documents into Pinecone
+docsearch = Pinecone.from_texts([t.page_content for t in texts], embeddings, index_name=index_name)
+
 def process_message(user_id, message):
-    convo_length = 30
+    convo_length = 15
     
     # Get user input, save it, vectorize it, save to pinecone
     payload = list()
@@ -172,11 +216,13 @@ def process_message(user_id, message):
     # Search for relevant messages, and generate a response
     results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
     conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
-    prompt = prompt_response_template.replace('<<CONVERSATION>>', conversation).replace('<<MESSAGE>>', message)
+    docs = docsearch.similarity_search(message, k=3, include_metadata=True)
+    context = ' '.join(doc.page_content for doc in docs)
+    prompt = prompt_response_template.replace('<<CONVERSATION>>', conversation).replace('<<MESSAGE>>', message).replace('<<CONTEXT>>', context)
 
 
     # Generate response, vectorize, save, etc
-    output = openai_api.gpt3_completion(prompt, user_id)
+    output = openai_api.gpt4_completion(prompt, user_id)
     timestamp = time()
     timestring = timestamp_to_datetime(timestamp)
     message = output
