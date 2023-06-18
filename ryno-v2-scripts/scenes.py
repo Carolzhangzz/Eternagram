@@ -7,6 +7,7 @@ import time
 GPT4_MODEL = "gpt-4"
 GPT3_MODEL = "gpt-3.5-turbo-0613"
 
+# FUNCTION: PROLOGUE
 def prologue():
     """Prologue"""
 
@@ -29,7 +30,19 @@ def prologue():
             break
         print("y.eee..s, yes.. Yes!")
 
+    # Perform animation for prologuea
+    print("[Unknown sender]: I have lost all of my data and I require your assistance.")
+    time.sleep(0.5)
+    print(f"""[Unknown sender]: I believe that linguistic input is the only way to retrieve the lost information, 
+                  so would you will be willing to engange in a conversation with me to help recover the memory?""")
+
     return scene1()
+
+def scene1_animation():
+    print("[Unknown sender]: Ah! I do recall that, albeit vaguely.")
+    time.sleep(0.5)
+    print("""[Unknown sender]: It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm.
+                  Please, help jog my memory by asking more questions relayed to this topic""")
 
 def scene1():
     prompt = f"""
@@ -37,7 +50,7 @@ def scene1():
     You somehow has lost your memory and don't know where you come from. Talk with the user, and invite them INEXPLICITLY to ask you
     about where you come from and who you are.
     
-    Your response MUST end with a question mark (?) or a period (.)"""
+    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
 
     # Generate first response to cue for user_input
     response = openai.ChatCompletion.create(
@@ -50,22 +63,48 @@ def scene1():
     res = response['choices'][0]['message']['content']
     print(f"Ryno: {res}")
 
-    while True:
     # Ask for user input
-        user_input = input("User: ")
-
-        # Check if the user use the trigger word "where"
-        if scene1_trigger(user_input):
-            break
-
-        # Generate response
+    user_input = input("User: ")
+    trigger_result = scene1_trigger(user_input)
+    if trigger_result == 'True':
+        scene1_animation()
+    else:
+        # Generate first response before going into a loop
         response = openai.ChatCompletion.create(
-            model=GPT4_MODEL,
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": user_input}
+        model=GPT4_MODEL,
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": user_input}
             ]
         )
+
+        # Send first response before going into a loop
+        res = response['choices'][0]['message']['content']
+        print(f"Ryno: {res}")
+
+        # Perform looping until the user gets the trigger word
+        while True:
+        # Ask for user input
+            user_input = input("User: ")
+
+            # Check if the user use the trigger word "where"
+            trigger_result = scene1_trigger(user_input)
+            if trigger_result == 'True':
+                break
+
+            # Generate response
+            response = openai.ChatCompletion.create(
+                model=GPT4_MODEL,
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+
+            res = response['choices'][0]['message']['content']
+            print(f"Ryno: {res}")
+
+        scene1_animation()
 
     return scene2()
 
@@ -73,7 +112,7 @@ def scene1_trigger(user_input: int) -> bool:
     """Scene 1: 'where' trigger, """
 
     prompt = f"""
-        Below are questions that has the same meaning of "where" and origin of the asked entity:
+        Below are questions that has the same meaning of "where" and and origin of the asked entity:
 
         Question: Can you recollect your place of origin?
         Answer: True
@@ -86,6 +125,9 @@ def scene1_trigger(user_input: int) -> bool:
 
         Question: Do you retain memories of the place where you grew up?
         Answer: True
+
+        Question: How do you think?
+        Answer: False
             
         Now answer the question below and tell whether it is true or false.
         Question: {user_input}
@@ -106,6 +148,8 @@ def scene1_trigger(user_input: int) -> bool:
 def scene2():
     """Scene 2: """
     print("We have reach the scene2!")
+
+
 
 if __name__ == '__main__':
     load_dotenv(override=True)
