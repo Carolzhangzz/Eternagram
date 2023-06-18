@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
-from chat2 import process_message  
+from chat import process_message  
 from fastapi.middleware.cors import CORSMiddleware
 
 port = int(os.environ.get("PORT",8080))

@@ -45,7 +45,7 @@ def scene1_animation():
                   Please, help jog my memory by asking more questions relayed to this topic""")
 
 def scene1():
-    prompt = f"""
+    prompt1 = f"""
     You are Ryno, an inhabitant from a planet away from earth. 
     You somehow has lost your memory and don't know where you come from. Talk with the user, and invite them INEXPLICITLY to ask you
     about where you come from and who you are.
@@ -56,7 +56,7 @@ def scene1():
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": prompt},
+            {"role": "system", "content": prompt1},
         ],
         max_tokens=50
     )
@@ -73,7 +73,7 @@ def scene1():
         response = openai.ChatCompletion.create(
         model=GPT4_MODEL,
         messages=[
-            {"role": "system", "content": prompt},
+            {"role": "system", "content": prompt1},
             {"role": "user", "content": user_input}
             ]
         )
@@ -96,7 +96,7 @@ def scene1():
             response = openai.ChatCompletion.create(
                 model=GPT4_MODEL,
                 messages=[
-                    {"role": "system", "content": prompt},
+                    {"role": "system", "content": prompt1},
                     {"role": "user", "content": user_input}
                 ]
             )
@@ -147,8 +147,48 @@ def scene1_trigger(user_input: int) -> bool:
 
 def scene2():
     """Scene 2: """
-    print("We have reach the scene2!")
 
+    # Generate first response to cue users to talk
+    prompt2 = f"""
+    You are Ryno, an inhabitant from a planet away from earth. You somehow has learned things that happened to your world, 
+    but you don't know why it happened. Talk with the user, and invite them INEXPLICITLY to ask you
+    about why things happened in your world. Use the context below to answer what happened to your world.
+
+    CONTEXT:
+    <<CONTEXT>>
+    
+    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
+
+    # Generate first response to cue for user_input
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": prompt2},
+        ],
+        max_tokens=50
+    )
+    res = response['choices'][0]['message']['content']
+    print(f"Ryno: {res}")
+
+def scene3():
+    """Scene 3: """
+    prompt3 = f"""
+    You are Ryno, an inhabitant from a planet away from earth. 
+    You somehow has lost your memory and don't know where you come from. Talk with the user, and invite them INEXPLICITLY to ask you
+    about where you come from and who you are.
+    
+    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
+
+    # Generate first response to cue for user_input
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": prompt3},
+        ],
+        max_tokens=50
+    )
+    res = response['choices'][0]['message']['content']
+    print(f"Ryno: {res}")
 
 
 if __name__ == '__main__':
