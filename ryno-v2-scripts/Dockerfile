@@ -14,6 +14,9 @@ RUN pip install --extra-index-url https://pypi.pinecone.io/ --trusted-host pypi.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy Google app credentials
+COPY my_project_key.json .
+
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
 

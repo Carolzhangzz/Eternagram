@@ -34,8 +34,6 @@ connected_clients = set()
 
 load_dotenv()
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json.dumps({"type":"service_account","project_id":"ryno-v2-380310","private_key_id":"7a166da22815442fc19791ff10a630c75eaf7b6d","private_key":"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClqY9gXprbr7x9\nGgEt1SlmSKhZYidNwjRVsv3LwkErU4unwSKUInz8og5t4ntv89eaQGAYRwtqI4/f\nJT6GGEzXwyefQVTftH/tVY8AzyaLdJWHjioWAJILFxzuNYhl2qICBuJHTgyvNxgP\nH/BDRJJtFTi2z7yTdfr8la71Aq3Dg9Lkslh5NiQMzQQvXS0owgEG+KWBhSfmGJ0O\nKQJRlFXU4s/zow5RLsk0uLK3fkb4h8ksatyKXNEhTgijW6l7TB4oo406lG8U1346\nNpoii+jGlbz2V2YKGOy9OwzF9ulRcrNrpUIgvyFqz19glmIbke2Cme97xA0xRRHP\njdAXWuRVAgMBAAECggEACUru5kDATpD30YuvI79IlHqAaQ0qt7+sWF9TQcYKik/k\nLluU4TrjCHfdt9fDxVaoEjjIuyvnDcPjaujHrlV4IAVMOHB9fpP9Nha90BWOq7V1\nOtakcToEdzdLcehSV6ZRPqxcrpPH/d8pDBYmT9utnA1b8lNKWHo+g0MxPoCxNx2b\niJBJ+LV0LnH9UwZ39FuAcWeN21ZdSJfj7IT8OYspFPL6cpGCm4oMkylKOeHOIOHL\neFYncM/pvSGX3VXTvT5BAMtCk9vrtzrgQn5NDy/VSN4bsmtS3LrjPfA05UDpjYKM\n+leMuXRoUuPLvwz0HiSSooByEePgj7fGd3qJ6+b66QKBgQDZP7iA03BhslVWQFOw\nFufdDG2/FtPx22DhQjPozTTtNoW7uuMWKK/tTnaAFkixxe6EQZG7lbSUtr6BrRHV\n/G/xX/Lf54qzAsSYYKj07tbRh7hQe1OFfKPZsbbC326UJC44QQZfM/c9OrIT+FzZ\nBldpIencB7o8b0g2qqkz2zKE3QKBgQDDNjtijfHYtrBPR5x971VA+KUrZiIQxaTX\n9BL9zMR6En7BWfOt7C4A4QcjAHgr8mq6TCN/jwz++gXbVM5fmUCtd+BejrvXZG37\nkWfvBGWnwu/6MDCL7GgAjSFzof02j0pmqoXh5cF7m8fyKWGvuWrcLwgXVFuJcZYz\nDzxb3EaJ2QKBgDvu+FeR/U72g9Rnqq7Jou24oA43ngD7JJ8ARJHVCuTmRb6ksEFM\nuDwfiVGM1EE2+bZC4JF/m3HreGMN+/2sxrUwYzCiEAGSoennwLTRrzHe31pUq5YH\n7KwB+wmH2lnEIXwjdD6Pd4XMy5P20KaOuU6nrHynJRnHGYT7T/KeZjGBAoGBAI9Y\nN2s7SCgWnojY0PU41aWL791adhFS0KUzOO7dejkZc7KPVvyTvYQvuYneQmAi9nQu\njLKSXLyu47YXJCPW6UN4D23f6ddUi956+5Lr66mw338b+8oDoqsk9zdt7/4sYjnZ\nZc5nZBhcYApWkMD0qp9cediHvV/D5MNBoNTjf3ihAoGARKHX0WVaiuRlNFQmrLMV\nOHklLbHbtsL2uuLWARMt/6h/XSqIpGMj+/V18swk224Q8uETJ2EszyFi4kTjQbCz\nMM+nMS1CRhs1k0JKeSuIDtTR9X7y0Aeou7YLOLrpGChR3fdqe6mr8mksb8Ea6Jpw\nOujzCEhgXJh2w/GJwQFnrLQ=\n-----END PRIVATE KEY-----\n","client_email":"ryno-storage@ryno-v2-380310.iam.gserviceaccount.com","client_id":"107173685212314532860","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/ryno-storage%40ryno-v2-380310.iam.gserviceaccount.com"})
-
 # MODELS
 GPT3_MODEL = 'gpt-3.5-turbo'
 GPT4_MODEL = 'gpt-4'
@@ -57,12 +55,6 @@ docsearch = Pinecone.from_texts([t.page_content for t in texts], embeddings, ind
 # Convert timestamp to datetime
 def timestamp_to_datetime(unix_time):
     return datetime.datetime.fromtimestamp(unix_time).strftime("%A, %B %d, %Y at %I:%M%p %Z")
-
-# FUNCTION: generate user id function
-def generate_user_id():
-    print("Please enter your username (no spaces):")
-    username = input()
-    return username
 
 # FUNCTION: trim cut-off responses
 def trim_response(response_text):
@@ -137,7 +129,7 @@ def scene1_trigger(user_input: str) -> bool:
     """Scene 1: 'where' trigger, """
 
     prompt = f"""
-        Below are questions that has the same meaning of "where" and and origin of the asked entity:
+        Below are questions that has the same meaning of "where" and origin of the asked entity:
 
         Question: Can you recollect your place of origin?
         Answer: True
@@ -171,9 +163,9 @@ def scene1_trigger(user_input: str) -> bool:
     return res
 
 def scene1_animation():
-    print("[Unknown sender]: Ah! I do recall that, albeit vaguely.")
+    print("Ah! I do recall that, albeit vaguely.")
     time.sleep(0.5)
-    print("""[Unknown sender]: It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm.
+    print("""It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm.
                   Please, help jog my memory by asking more questions relayed to this topic""")
 
 def scene1(user_input, user_id, vector):
@@ -181,20 +173,25 @@ def scene1(user_input, user_id, vector):
 
     convo_length = 15 
 
-    # Prompt 1
-    prompt1 = f"""
-    You are Ryno, an inhabitant from a planet away from earth. 
-    You somehow has lost your memory and don't know where you come from. Talk with the user, and invite them INEXPLICITLY to ask you
-    about where you come from and who you are.
-    
-    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
-
     # Search for relevant messages, and generate a response
     results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
     conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
     docs = docsearch.similarity_search(user_input, k=3, include_metadata=True)
     context = ' '.join(doc.page_content for doc in docs)
-    prompt1 = prompt_response_template.replace('<<CONVERSATION>>', conversation).replace('<<CONTEXT>>', context)
+
+    # Prompt 1
+    prompt1 = f"""
+    You are Ryno, an inhabitant from a planet away from earth. 
+    You somehow has lost your memory and don't know where you come from. Talk with the user, and invite them INEXPLICITLY to ask you
+    about where you come from and who you are.
+
+    CONTEXT:
+    {context}
+
+    PAST CONVERSATIONS:
+    {conversation}
+    
+    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
 
     # Generate response
     response = openai.ChatCompletion.create(
@@ -202,19 +199,66 @@ def scene1(user_input, user_id, vector):
         messages=[
             {"role": "system", "content": prompt1},
         ],
-        max_tokens=50
+        max_tokens=100,
+        temperature=0.5
     )
     res = response['choices'][0]['message']['content']
 
-    return 'scene2', False, res
+    return 'scene1', False, res
 
 
 # FUNCTION: SCENE 2
 def scene2_trigger(user_input: str) -> bool:
-    """Scene 2: 'why' trigger"""
+    """Scene 2: 'why' trigger, """
+
+    prompt = f"""
+        Below are questions that has the same meaning of "why" and why things happened in an entity's world:
+
+        Question: Can you recall the origins of this environmentally devastating situation?
+        Answer: True
+            
+        Question: Where do you think am I?s
+        Answer: False
+            
+        Question: Could you jog your memory about the place you come from?
+        Answer: False
+
+        Question: Do you remember what factors played a role in causing this environmental tragedy?
+        Answer: True
+
+        Question: Do you have any memory of what triggered this environmentally devastating event?
+        Answer: True
+
+        Question: Could you remind me of the reasons behind this environmental devastation?
+        Answer: 
+            
+        Now answer the question below and tell whether it is true or false.
+        Question: {user_input}
+        Answer: """
+
+    response = openai.ChatCompletion.create(
+            model=GPT3_MODEL,
+            messages = [
+                {"role":"system", "content": prompt},
+                {"role":"user", "content": user_input}
+            ]
+    )
+
+    # Check if trigger word is found
+    res = response['choices'][0]['message']['content']
+    return res
 
 def scene2_animation():
     """Scene 2 Animation"""
+    print("Emmmmm....")
+    time.sleep(0.5)
+    print("I sense something, something profound. I'm trying to recall why the catastrophe happened.")
+    time.sleep(1)
+    print("I might need more permission to access this part of my memory. I believe you are on the right track.")
+    time.sleep(1)
+    print("Understanding why the catastrophe happened is critical to my memory recovery. Perhaps, it can even help me answer who I am.")
+    time.sleep(1)
+    print("Please, help jog my memory by asking more questions related to this topic.")
 
 def scene2(user_input, user_id, vector):
     """Scene 2: """
@@ -247,23 +291,58 @@ def scene2(user_input, user_id, vector):
         messages=[
             {"role": "system", "content": prompt2},
         ],
-        max_tokens=50
+        max_tokens=100,
+        temperature=0.5
     )
     res = response['choices'][0]['message']['content']
     print(f"Ryno: {res}")
 
-    return 'scene3'
+    return 'scene2', False, res
 
 
 # FUNCTION: SCENE 3
-def scene3():
+def scene3(user_input, user_id, vector):
     """Scene 3: """
+
+    convo_length = 15
+
+    # Search for relevant messages, and generate a response
+    results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
+    conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
+    docs = docsearch.similarity_search(user_input, k=3, include_metadata=True)
+    context = ' '.join(doc.page_content for doc in docs)
+
+    # Generate first response to cue users to talk
+    prompt3 = f"""
+    You are Ryno, an inhabitant from a planet away from earth. You somehow has learned things that happened to your world, 
+    but you don't know why it happened. Talk with the user, and invite them INEXPLICITLY to ask you
+    about why things happened in your world. Use the context below to answer what happened to your world.
+
+    CONTEXT:
+    {context}
+
+    PAST CONVERSATIONS:
+    {conversation}
+    
+    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
+
+    # Generate first response to cue for user_input
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": prompt3},
+        ],
+        max_tokens=100,
+        temperature=0.5
+    )
+    res = response['choices'][0]['message']['content']
+    print(f"Ryno: {res}")
 
     return None
 
 
 # FUNCTION: PROCESS MESSAGE
-def process_message(user_id, message, scene='prologue'):
+async def process_message(user_id, message, websocket, get_input_callback, scene='prologue'):
 
     # Get user input, save it, vectorize it, save to pinecone
     payload = list()
@@ -280,35 +359,36 @@ def process_message(user_id, message, scene='prologue'):
         if scene == 'prologue':
             scene, continue_loop, res = prologue(message, user_id, vector)
         elif scene == 'scene1':
-            scene, continue_loop, res = scene1(message, user_id, vector)
-            if not continue_loop:
-                trigger_result = scene1_trigger(message)
-                if trigger_result == "True":
-                    scene1_animation()
-                    scene = 'scene2'
-                    break
-            # message = get_next_user_input()
+            while continue_loop:
+                scene, continue_loop, res = scene1(message, user_id, vector)
+                if not continue_loop:
+                    trigger_result = scene1_trigger(message)
+                    if trigger_result == "True":
+                        scene1_animation()
+                        scene = 'scene2'
+                        break
+                    else:
+                        continue_loop = True
         elif scene == 'scene2':
-            scene, continue_loop, res = scene2(message)
-            if not continue_loop:
-                trigger_result = scene2_trigger(message)
-                if trigger_result == "True":
-                    scene2_animation()
-                    scene = 'scene3'
-                    break
-                # message = get_next_user_input()
+            while continue_loop:
+                scene, continue_loop, res = scene2(message)
+                if not continue_loop:
+                    trigger_result = scene2_trigger(message)
+                    if trigger_result == "True":
+                        scene2_animation()
+                        scene = 'scene3'
+                        break
+                    else:
+                        continue_loop = True
         elif scene == 'scene3':
             scene, continue_loop, res = scene3(message, user_id, vector)
         else:
             print("Invalid scene")
             break
 
-        # Get the next user input from the ReactJS website
-        # send_response_to_frontend(res)
-
         if continue_loop:
             # Get the next user input from the ReactJS website
-            # message = get_next_user_input()
+            message = await get_input_callback(websocket)
 
             # Save user input, vectorize it, save to pinecone
             timestamp = time()

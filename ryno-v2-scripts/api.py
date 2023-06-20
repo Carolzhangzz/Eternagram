@@ -53,7 +53,7 @@ async def websocket_endpoint(websocket: WebSocket):
             print(f"User: {user_input}")
 
             # Call process_message() with the user_input and get the response
-            res = process_message(user_id, user_input)
+            res = await process_message(user_id, user_input, websocket, get_next_user_input)
 
             # Send the response to the frontend
             await send_response_to_frontend(res, websocket)
