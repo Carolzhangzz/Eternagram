@@ -6,10 +6,14 @@ import image01 from './image01.jpeg';
 import image02 from './image02.jpeg';
 import audio01 from './audio01.mp3';
 import audio02 from './audio02.mp3';
+import axios from 'axios'
 
 let firstclick = false;
 
 const App = () => {
+	var findimg = "";
+	//the status flag is used to identify the status of images 
+	var status = 1;
   // Constants
   const [userId, setUserId] = useState('');
   const [message, setMessage] = useState('');
@@ -76,10 +80,30 @@ const App = () => {
     const sendSeparatedMessages = async () => {
       for (const message of separatedMessages) {
         setTyping(true);
-
+	
         // Show Ryno typing indicator between messages
         await new Promise((resolve) => setTimeout(resolve, 1000)); 
-
+		//A function to match images in the database
+		//Status is a mark, can prevent the picture from being repeated;
+		if (status ==1){
+			//set up port mapping to my backend
+		  axios.get("https://46601y073r.imdo.co/picture/in?message="+findimg).then(res=>{
+		    if (res.data){
+		      if (status == 1){
+				//if it matches,and it was the first time to send 
+		        console.log("return value judgment：",res)
+		        const newMessageWithChatGPT1 = {
+		          message: "<img width='250'  height='250' src='https://46601y073r.imdo.co/picture/getjpg1?message="+findimg+"'/>",
+		          sender: "ChatGPT",
+		          direction: "ingoing",
+		        };
+		        setMessages((prevMessages) => [...prevMessages, newMessageWithChatGPT1]);
+		        status = 0;
+		      }
+		    }
+		  })
+		}
+		
         const newMessageWithChatGPT = {
           message: message,
           sender: "ChatGPT",
@@ -218,6 +242,12 @@ const App = () => {
           value=">"
           onClick={(e) => {
             e.preventDefault();
+			// handleSend(message);
+			findimg = message;
+			status = 1;
+			//Message is obtained from the input box, 
+			//as a global variable, obtained in the sending method
+			handleSend(message);
             removementionandsenduserid();
           }} />
         </form>
