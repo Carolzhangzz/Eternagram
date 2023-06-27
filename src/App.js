@@ -210,10 +210,10 @@ const App = () => {
       <div className="headerBox">
         <div className="header">
           <div>
-            <img src="/icons/profile picture.png" alt="" /> <div>Ryno</div>
+            <img src="/profile picture.png" alt="" /> <div>Ryno</div>
           </div>
           <div>
-            <img src="/icons/phoneandvideo.png" alt="" srcset="" />
+            <img src="/phoneandvideo.png" alt="" srcset="" />
           </div>
         </div>
       </div>
@@ -242,7 +242,7 @@ const App = () => {
           </p> */}
           <div className="inputBox">
             <div className="leftIcon">
-              <img src="/icons/camera.png" />
+              <img src="/camera.png" />
             </div>
             <input
               id="input"
@@ -253,8 +253,8 @@ const App = () => {
             />
 
             <div className="rightIcon">
-              <img src="/icons/microphone.png" />
-              <img src="/icons/pic.png" />
+              <img src="/microphone.png" />
+              <img src="/pic.png" />
               {/* <img src="/icons/smail.png" /> */}
               <input
                 className=""
@@ -300,4 +300,5 @@ const App = () => {
 };
 
 export default App;
+
 
