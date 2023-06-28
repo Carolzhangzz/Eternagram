@@ -25,4 +25,4 @@ ENV NAME World
 ENV PORT 8080
 
 # Run Uvicorn with FastAPI application
-CMD ["uvicorn", "api:api", "--host", "0.0.0.0", "--port", "8080"]
+CMD uvicorn api:api --host 0.0.0.0 --port $PORT --workers 2

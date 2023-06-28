@@ -1,65 +1,51 @@
-import os
-from fastapi import FastAPI, WebSocket
-from pydantic import BaseModel
-from chat import process_message  
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from chat import process_message
+import logging
 
-port = int(os.environ.get("PORT",8080))
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 api = FastAPI()
-connected_clients = set()
+
+origins = [
+    "https://ryno-v2-cedo4cgxka-de.a.run.app",  # Your API domain
+    "http://localhost:8000",
+    # Add other domains as needed
+]
 
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define a Pydantic model for the request payload
-class ChatRequest(BaseModel):
+class MessageInput(BaseModel):
     user_id: str
     message: str
 
-# API endpoint to handle chat requests
-@api.post("/chat")
-async def chat_endpoint(chat_input: ChatRequest):
-    user_id = chat_input.user_id
-    message = chat_input.message
+class MessageOutput(BaseModel):
+    response: str
 
-    # Set user_id and process the message using your chat.py script
-    response = process_message(user_id, message)  # Add a function in chat.py that processes the message and returns the response
+@api.post("/message", response_model=MessageOutput)
+def process_message_endpoint(message_input: MessageInput) -> MessageOutput:
+    user_id = message_input.user_id
+    user_message = message_input.message
 
-    return {"response": response}
-
-async def get_next_user_input(websocket: WebSocket):
-    user_input = await websocket.receive_text()
-    return user_input
-
-async def send_response_to_frontend(res: str, websocket: WebSocket):
-    await websocket.send_text(res)
-
-@api.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    connected_clients.add(websocket)
-
-    # Receive the user_id from the frontend
-    user_id = await get_next_user_input(websocket)
+    logger.info(f"Received message from user {user_id}: {user_message}")
 
     try:
-        while True:
-            user_input = await get_next_user_input(websocket)
-            print(f"User: {user_input}")
+        # Call the process_message function with the user_input and get the response
+        res = process_message(user_id, user_message)
+        logger.info(f"Received response from process_message: {res}")
+    except Exception as e:
+        logger.error(f"Error processing message: {e}")
+        raise
 
-            # Call process_message() with the user_input and get the response
-            res = await process_message(user_id, user_input, websocket, get_next_user_input)
+    logger.info(f"Sending response: {res}")
 
-            # Send the response to the frontend
-            await send_response_to_frontend(res, websocket)
-    finally:
-        connected_clients.remove(websocket)
-        
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("api:api", host="0.0.0.0", port=port, log_level="info")
+    # Return the response as JSON
+    return MessageOutput(response=res)

@@ -1,5 +1,6 @@
 fastapi==0.95.0
 langchain==0.0.131
+tiktoken
 numpy==1.23.5
 openai==0.27.0
 pdfplumber==0.8.0

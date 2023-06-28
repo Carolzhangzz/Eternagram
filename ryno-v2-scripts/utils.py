@@ -8,6 +8,13 @@ import google.cloud.storage as google_storage
 from google.oauth2 import service_account
 import openai
 import pinecone
+import datetime
+import pdfplumber
+from io import BytesIO
+
+# LangChain library
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json.dumps({"type":"service_account","project_id":"ryno-v2-380310","private_key_id":"7a166da22815442fc19791ff10a630c75eaf7b6d","private_key":"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClqY9gXprbr7x9\nGgEt1SlmSKhZYidNwjRVsv3LwkErU4unwSKUInz8og5t4ntv89eaQGAYRwtqI4/f\nJT6GGEzXwyefQVTftH/tVY8AzyaLdJWHjioWAJILFxzuNYhl2qICBuJHTgyvNxgP\nH/BDRJJtFTi2z7yTdfr8la71Aq3Dg9Lkslh5NiQMzQQvXS0owgEG+KWBhSfmGJ0O\nKQJRlFXU4s/zow5RLsk0uLK3fkb4h8ksatyKXNEhTgijW6l7TB4oo406lG8U1346\nNpoii+jGlbz2V2YKGOy9OwzF9ulRcrNrpUIgvyFqz19glmIbke2Cme97xA0xRRHP\njdAXWuRVAgMBAAECggEACUru5kDATpD30YuvI79IlHqAaQ0qt7+sWF9TQcYKik/k\nLluU4TrjCHfdt9fDxVaoEjjIuyvnDcPjaujHrlV4IAVMOHB9fpP9Nha90BWOq7V1\nOtakcToEdzdLcehSV6ZRPqxcrpPH/d8pDBYmT9utnA1b8lNKWHo+g0MxPoCxNx2b\niJBJ+LV0LnH9UwZ39FuAcWeN21ZdSJfj7IT8OYspFPL6cpGCm4oMkylKOeHOIOHL\neFYncM/pvSGX3VXTvT5BAMtCk9vrtzrgQn5NDy/VSN4bsmtS3LrjPfA05UDpjYKM\n+leMuXRoUuPLvwz0HiSSooByEePgj7fGd3qJ6+b66QKBgQDZP7iA03BhslVWQFOw\nFufdDG2/FtPx22DhQjPozTTtNoW7uuMWKK/tTnaAFkixxe6EQZG7lbSUtr6BrRHV\n/G/xX/Lf54qzAsSYYKj07tbRh7hQe1OFfKPZsbbC326UJC44QQZfM/c9OrIT+FzZ\nBldpIencB7o8b0g2qqkz2zKE3QKBgQDDNjtijfHYtrBPR5x971VA+KUrZiIQxaTX\n9BL9zMR6En7BWfOt7C4A4QcjAHgr8mq6TCN/jwz++gXbVM5fmUCtd+BejrvXZG37\nkWfvBGWnwu/6MDCL7GgAjSFzof02j0pmqoXh5cF7m8fyKWGvuWrcLwgXVFuJcZYz\nDzxb3EaJ2QKBgDvu+FeR/U72g9Rnqq7Jou24oA43ngD7JJ8ARJHVCuTmRb6ksEFM\nuDwfiVGM1EE2+bZC4JF/m3HreGMN+/2sxrUwYzCiEAGSoennwLTRrzHe31pUq5YH\n7KwB+wmH2lnEIXwjdD6Pd4XMy5P20KaOuU6nrHynJRnHGYT7T/KeZjGBAoGBAI9Y\nN2s7SCgWnojY0PU41aWL791adhFS0KUzOO7dejkZc7KPVvyTvYQvuYneQmAi9nQu\njLKSXLyu47YXJCPW6UN4D23f6ddUi956+5Lr66mw338b+8oDoqsk9zdt7/4sYjnZ\nZc5nZBhcYApWkMD0qp9cediHvV/D5MNBoNTjf3ihAoGARKHX0WVaiuRlNFQmrLMV\nOHklLbHbtsL2uuLWARMt/6h/XSqIpGMj+/V18swk224Q8uETJ2EszyFi4kTjQbCz\nMM+nMS1CRhs1k0JKeSuIDtTR9X7y0Aeou7YLOLrpGChR3fdqe6mr8mksb8Ea6Jpw\nOujzCEhgXJh2w/GJwQFnrLQ=\n-----END PRIVATE KEY-----\n","client_email":"ryno-storage@ryno-v2-380310.iam.gserviceaccount.com","client_id":"107173685212314532860","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/ryno-storage%40ryno-v2-380310.iam.gserviceaccount.com"})
@@ -20,24 +27,40 @@ class CloudStorage:
         self.client = google_storage.Client(credentials=credentials)
         self.bucket = self.client.bucket(bucket_name)
 
-    # Load prompt_response.txt from Google Cloud Storage
-    def load_prompt_response(self, filepath):
-        return self.open_file(filepath)
-
-    # Load JSON file from Google Cloud Storage
-    def load_json(self, filepath):
+    # Check if file exists
+    def file_exists(self, filepath):
         blob = self.bucket.blob(filepath)
-        return json.loads(blob.download_as_string())
-
+        return blob.exists()
+    
+    # Load JSON file to Google Cloud Storage
+    def load_json(self, filepath):
+        try:
+            if self.file_exists(filepath):
+                blob = self.bucket.blob(filepath)
+                return json.loads(blob.download_as_string())
+            else:
+                print(f"File {filepath} does not exist.")
+                return None
+        except Exception as e:
+            print(f"An error occurred while loading JSON: {e}")
+            return None
+        
     # Save JSON file to Google Cloud Storage
     def save_json(self, filepath, payload):
-        blob = self.bucket.blob(filepath)
-        blob.upload_from_string(json.dumps(payload))
+        try:
+            blob = self.bucket.blob(filepath)
+            blob.upload_from_string(json.dumps(payload))
+        except Exception as e:
+            print(f"An error occurred while saving JSON: {e}")
 
     # Open text file from Google Cloud Storage
     def open_file(self, filepath):
-        blob = self.bucket.blob(filepath)
-        return blob.download_as_string().decode()
+        if self.file_exists(filepath):
+            blob = self.bucket.blob(filepath)
+            return blob.download_as_string().decode()
+        else:
+            print(f"File {filepath} does not exist.")
+            return None
     
     # Open binary file from Google Cloud Storage
     def open_binary_file(self, filepath):
@@ -66,7 +89,7 @@ class OpenAI:
             return None
 
     # Setup GPT-4 completion
-    def gpt4_completion(self, prompt, user_id, model='gpt-3.5-turbo', temp=0.7, top_p=0.8, tokens=None, freq_pen=0.0, pres_pen=0.0, stop=['You:', 'Ryno:'], response_length=None):
+    def gpt4_completion(self, prompt, user_id, message, model='gpt-4', temp=0.7, top_p=0.8, tokens=None, freq_pen=0.0, pres_pen=0.0, stop=['You:', 'Ryno:'], response_length=None):
         max_retry = 5
         retry = 0
         tokens = tokens or response_length
@@ -75,7 +98,10 @@ class OpenAI:
             try:
                 response = openai.ChatCompletion.create(
                     model=model,
-                    messages=[{"role":"user", "content": prompt}],
+                    messages=[
+                        {"role":"system", "content": prompt}, 
+                        {"role":"user", "content": message}
+                        ],
                     temperature=temp,
                     max_tokens=tokens,
                     top_p=top_p,
@@ -122,9 +148,6 @@ env_file = {line.split('=')[0]: line.split('=')[1] for line in env_file_content.
 # CloudStorage initialisation
 storage = CloudStorage('ryno-v2', os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
-# Load prompt_response.txt from Google Cloud Storage
-prompt_response_template = storage.load_prompt_response('keys/prompt_response.txt')
-
 # Set up OpenAI API key and model
 openai.api_key = env_file['REACT_APP_OPENAI_API_KEY '].strip(" '")
 openai_api = OpenAI(openai.api_key)
@@ -139,3 +162,56 @@ pinecone_api_key_data = env_file['PINECONE_API_KEY_DATA '].strip(" '")
 pinecone.init(api_key=pinecone_api_key_data, environment="us-east1-gcp")
 index_name = "climate-change-game"
 embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key)
+
+# Load PDF data
+file_name = "Climate Change Game.pdf"
+pdf_data = storage.open_binary_file(file_name)
+with pdfplumber.open(BytesIO(pdf_data)) as pdf:
+    # Extract text from each page and create Page objects
+    data = [Page(page.extract_text()) for page in pdf.pages]
+
+# Chunk data into smaller documents
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=20, separators=['\n\n', '\n', ' ', ''])
+texts = text_splitter.split_documents(data)
+
+# Passing the documents into Pinecone
+docsearch = Pinecone.from_texts([t.page_content for t in texts], embeddings, index_name=index_name)
+
+# Convert timestamp to datetime
+def timestamp_to_datetime(unix_time):
+    return datetime.datetime.fromtimestamp(unix_time).strftime("%A, %B %d, %Y at %I:%M%p %Z")
+
+# FUNCTION: trim cut-off responses
+def trim_response(response_text):
+    trimmed_response = response_text.strip()
+    last_period = trimmed_response.rfind(".")
+    last_question = trimmed_response.rfind("?")
+    last_exclamation = trimmed_response.rfind("!")
+    last_end = max(last_period, last_question, last_exclamation)
+
+    if last_end != -1:
+        return trimmed_response[: last_end + 1]
+    else:
+        return trimmed_response
+    
+# FUNCTION: get response length
+def get_response_length(user_input):
+    input_length = len(user_input)
+    if input_length <= 20:
+        return 50
+    elif input_length <= 100:
+        return 100
+    else:
+        return 150
+    
+# FUNCTION: Load conversation fuction
+def load_conversation(results, user_id):
+    result = list()
+    for m in results['matches']:
+        # Load JSON file with correct user_id and "user_id" key in metadata
+        info = storage.load_json('path/to/nexus/%s/%s.json' % (user_id, m['id']))
+        if info.get('user_id') == user_id:  # check if "user_id" key in metadata matches the requested user_id
+            result.append(info)
+    ordered = sorted(result, key=lambda d: d['time'], reverse=False)  # sort them all chronologically
+    messages = [i['message'] for i in ordered]
+    return '\n'.join(messages).strip()

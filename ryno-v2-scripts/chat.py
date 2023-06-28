@@ -1,36 +1,12 @@
-import os
-import json
-from numpy.linalg import norm
-import re
-import pdfplumber
-from io import BytesIO
-
-# Google Cloud Storage Libraries
-from google.cloud import storage as google_storage
-from google.oauth2.service_account import Credentials
-from google.oauth2 import service_account
-from google.auth import default
-
-# LangChain library
-from langchain.document_loaders import UnstructuredPDFLoader, OnlinePDFLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma, Pinecone
-from langchain.llms import OpenAI
-from langchain.chains.question_answering import load_qa_chain
-
 # import from utils.py
-from utils import CloudStorage, OpenAI, Page
-from utils import storage, prompt_response_template, openai_api
-from utils import vdb, embeddings, index_name
+from utils import storage, openai_api
+from utils import vdb, docsearch
+from utils import load_conversation, timestamp_to_datetime
 
 import openai
 from dotenv import load_dotenv
-
-from time import time,sleep
+import time
 from uuid import uuid4
-import datetime
-
-connected_clients = set()
 
 load_dotenv()
 
@@ -38,91 +14,42 @@ load_dotenv()
 GPT3_MODEL = 'gpt-3.5-turbo'
 GPT4_MODEL = 'gpt-4'
 
-# Load PDF data
-file_name = "Climate Change Game.pdf"
-pdf_data = storage.open_binary_file(file_name)
-with pdfplumber.open(BytesIO(pdf_data)) as pdf:
-    # Extract text from each page and create Page objects
-    data = [Page(page.extract_text()) for page in pdf.pages]
-
-# Chunk data into smaller documents
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=20, separators=['\n\n', '\n', ' ', ''])
-texts = text_splitter.split_documents(data)
-
-# Passing the documents into Pinecone
-docsearch = Pinecone.from_texts([t.page_content for t in texts], embeddings, index_name=index_name)
-
-# Convert timestamp to datetime
-def timestamp_to_datetime(unix_time):
-    return datetime.datetime.fromtimestamp(unix_time).strftime("%A, %B %d, %Y at %I:%M%p %Z")
-
-# FUNCTION: trim cut-off responses
-def trim_response(response_text):
-    trimmed_response = response_text.strip()
-    last_period = trimmed_response.rfind(".")
-    last_question = trimmed_response.rfind("?")
-    last_exclamation = trimmed_response.rfind("!")
-    last_end = max(last_period, last_question, last_exclamation)
-
-    if last_end != -1:
-        return trimmed_response[: last_end + 1]
-    else:
-        return trimmed_response
-    
-# FUNCTION: get response length
-def get_response_length(user_input):
-    input_length = len(user_input)
-    if input_length <= 20:
-        return 50
-    elif input_length <= 100:
-        return 100
-    else:
-        return 150
-    
-# FUNCTION: Load conversation fuction
-def load_conversation(results, user_id):
-    result = list()
-    for m in results['matches']:
-        # Load JSON file with correct user_id and "user_id" key in metadata
-        info = storage.load_json('path/to/nexus/%s/%s.json' % (user_id, m['id']))
-        if info.get('user_id') == user_id:  # check if "user_id" key in metadata matches the requested user_id
-            result.append(info)
-    ordered = sorted(result, key=lambda d: d['time'], reverse=False)  # sort them all chronologically
-    messages = [i['message'] for i in ordered]
-    return '\n'.join(messages).strip()
-
-
 # FUNCTION: PROLOGUE
-def prologue(user_input, user_id, vector):
-    """Prologue"""
+def prologue(user_input, step):
+    # """Prologue"""
 
-    # Asks for first user input
-    user_input = input("User: ")
-    if user_input != "":
-        print("Ryno: y...")
+    if step == 1:
+        # Handle first user input
+        res = "y..."
         time.sleep(1)
-        print("Ryno: e...")
+        res += " e..."
+        next_step = step + 1
+        scene = 'prologue'
 
-    # Ask for second user input
-    user_input = input("User: ")
-    print("y.eee..s, yes.. Yes!")
+    elif step == 2:
+        # Handle second user input
+        res = "y.eee..s, yes.. Yes!"
+        next_step = step + 1
+        scene = 'prologue'
 
-    while True:
-        # Asks for third user input, until trigger word is found
-        user_input = input("User: ")
+    elif step == 3:
+        # Handle the third user input
         if "yes" in user_input.lower():
-            print("Ryno: Yes! the word, the language! I need help.")
-            break
-        print("y.eee..s, yes.. Yes!")
+            res = [
+                "Ryno: Yes! the word, the language! I need help.",
+                "[Unknown sender]: I have lost all of my data and I require your assistance.",
+                """[Unknown sender]: I believe that linguistic input is the only way to retrieve the lost information, 
+                so would you will be willing to engange in a conversation with me to help recover the memory?"""
+            ]
+            next_step = step + 1
+            scene = 'scene1'
 
-    # Perform animation for prologuea
-    print("[Unknown sender]: I have lost all of my data and I require your assistance.")
-    time.sleep(0.5)
-    print(f"""[Unknown sender]: I believe that linguistic input is the only way to retrieve the lost information, 
-                  so would you will be willing to engange in a conversation with me to help recover the memory?""")
+        else:
+            res = "y.eee..s, yes.. Yes!"
+            next_step = step
+            scene = 'prologue'
 
-    return 'scene1'
-
+    return scene, res, next_step
 
 # FUNCTION: SCENE 1
 def scene1_trigger(user_input: str) -> bool:
@@ -163,15 +90,19 @@ def scene1_trigger(user_input: str) -> bool:
     return res
 
 def scene1_animation():
-    print("Ah! I do recall that, albeit vaguely.")
-    time.sleep(0.5)
-    print("""It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm.
-                  Please, help jog my memory by asking more questions relayed to this topic""")
+    res = [
+        "Ah! I do recall that, albeit vaguely.",
+        """It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm.
+            Please, help jog my memory by asking more questions relayed to this topic"""
+    ]
+    return res
 
 def scene1(user_input, user_id, vector):
     """Scene 1: Ryno is having memory lost"""
 
-    convo_length = 15 
+    # Set the default scene
+    scene = 'scene1'
+    convo_length = 15
 
     # Search for relevant messages, and generate a response
     results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
@@ -194,17 +125,15 @@ def scene1(user_input, user_id, vector):
     Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
 
     # Generate response
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": prompt1},
-        ],
-        max_tokens=100,
-        temperature=0.5
-    )
-    res = response['choices'][0]['message']['content']
+    res = openai_api.gpt4_completion(prompt1, user_id, user_input, tokens=100, temp=0.5)
 
-    return 'scene1', False, res
+    # Check for trigger word
+    trigger_result = scene1_trigger(user_input)
+    if trigger_result == "True":
+        scene1_animation()
+        scene = 'scene2'
+
+    return scene, res
 
 
 # FUNCTION: SCENE 2
@@ -263,6 +192,8 @@ def scene2_animation():
 def scene2(user_input, user_id, vector):
     """Scene 2: """
 
+    # Set the default scene
+    scene = 'scene2'
     convo_length = 15
 
     # Search for relevant messages, and generate a response
@@ -285,19 +216,16 @@ def scene2(user_input, user_id, vector):
     
     Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
 
-    # Generate first response to cue for user_input
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": prompt2},
-        ],
-        max_tokens=100,
-        temperature=0.5
-    )
-    res = response['choices'][0]['message']['content']
-    print(f"Ryno: {res}")
+    # Generate response to cue for user_input
+    res = openai_api.gpt4_completion(prompt2, user_id, user_input, tokens=100, temp=0.5)
 
-    return 'scene2', False, res
+    # Check if the trigger word is found
+    trigger_result = scene2_trigger(user_input)
+    if trigger_result == "True":
+        scene2_animation()
+        scene = 'scene3'
+
+    return scene, res
 
 
 # FUNCTION: SCENE 3
@@ -327,90 +255,78 @@ def scene3(user_input, user_id, vector):
     Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
 
     # Generate first response to cue for user_input
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": prompt3},
-        ],
-        max_tokens=100,
-        temperature=0.5
-    )
-    res = response['choices'][0]['message']['content']
-    print(f"Ryno: {res}")
+    res = openai_api.gpt4_completion(prompt3, user_id, user_input, tokens=100, temp=0.5)
 
-    return None
+    return res
 
 
 # FUNCTION: PROCESS MESSAGE
-async def process_message(user_id, message, websocket, get_input_callback, scene='prologue'):
+def process_message(user_id, message):
+    total_start_time = time.time()
 
     # Get user input, save it, vectorize it, save to pinecone
     payload = list()
-    timestamp = time()
+    timestamp = time.time()
     timestring = timestamp_to_datetime(timestamp)
+    vector_start_time = time.time()
     vector = openai_api.gpt3_embeddings(message)
+    print(f"Vector generation for user input took {time.time() - vector_start_time} seconds")
     unique_id = str(uuid4())
-    metadata = {'speaker': 'You', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id}
+
+    # Retrieve the latest conversation metadata
+    retrieval_start_time = time.time()
+    results = vdb.query(vector=vector, top_k=1, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
+    print(f"Retrieval took {time.time() - retrieval_start_time} seconds")
+    if results['matches']:
+        latest_conversation = storage.load_json('path/to/nexus/%s/%s.json' % (user_id, results['matches'][0]['id']))
+    else:
+        latest_conversation = None
+
+    # Load latest step and scene
+    if latest_conversation:
+        step = latest_conversation['step']
+        scene = latest_conversation['scene']
+    else:
+        # If there's no previous conversation, start from the beginning
+        step = 1
+        scene = 'prologue'
+
+    # store the json, and vectors to db
+    metadata = {'speaker': 'You', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id, 'step': step, 'scene': scene}
     storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
     payload.append((unique_id, vector, metadata))
 
-    continue_loop = True
-    while scene and continue_loop:
-        if scene == 'prologue':
-            scene, continue_loop, res = prologue(message, user_id, vector)
-        elif scene == 'scene1':
-            while continue_loop:
-                scene, continue_loop, res = scene1(message, user_id, vector)
-                if not continue_loop:
-                    trigger_result = scene1_trigger(message)
-                    if trigger_result == "True":
-                        scene1_animation()
-                        scene = 'scene2'
-                        break
-                    else:
-                        continue_loop = True
-        elif scene == 'scene2':
-            while continue_loop:
-                scene, continue_loop, res = scene2(message)
-                if not continue_loop:
-                    trigger_result = scene2_trigger(message)
-                    if trigger_result == "True":
-                        scene2_animation()
-                        scene = 'scene3'
-                        break
-                    else:
-                        continue_loop = True
-        elif scene == 'scene3':
-            scene, continue_loop, res = scene3(message, user_id, vector)
-        else:
-            print("Invalid scene")
-            break
+    scene_start_time = time.time()
+    if scene == 'prologue':
+        scene, res, next_step = prologue(message, step)
+    elif scene == 'scene1':
+        scene, res = scene1(message, user_id, vector)
+    elif scene == 'scene2':
+        scene, res = scene2(message, user_id, vector)
+    elif scene == 'scene3':
+        res = scene3(message, user_id, vector)
+    else:
+        print("Invalid scene")
+        return "You are in invalid scene"
 
-        if continue_loop:
-            # Get the next user input from the ReactJS website
-            message = await get_input_callback(websocket)
+    print(f"Scene {scene} took {time.time() - scene_start_time} seconds")
 
-            # Save user input, vectorize it, save to pinecone
-            timestamp = time()
-            timestring = timestamp_to_datetime(timestamp)
-            vector = openai_api.gpt3_embeddings(message)
-            unique_id = str(uuid4())
-            metadata = {'speaker': 'You', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id}
-            storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
-            payload.append((unique_id, vector, metadata))
-        else:
-            break
+    # update the next step
+    step = next_step
 
     # Save Ryno's response, vectorize, save, etc
-    timestamp = time()
+    timestamp = time.time()
     timestring = timestamp_to_datetime(timestamp)
     message = res
+    vector_start_time = time.time()
     vector = openai_api.gpt3_embeddings(message)
+    print(f"Vector generation for response took {time.time() - vector_start_time} seconds")
     unique_id = str(uuid4())
-    metadata = {'speaker': 'Ryno', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id}
+    metadata = {'speaker': 'Ryno', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id, 'step': next_step, 'scene': scene}
     storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
     payload.append((unique_id, vector, metadata))
     vdb.upsert(payload)
 
+    print(f"Total time: {time.time() - total_start_time} seconds")
 
-
+    return res
