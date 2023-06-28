@@ -168,11 +168,8 @@ const App = () => {
       body: JSON.stringify({ user_id: userId, message: message }),
     };
 
-    const apiResponse = await fetch(
-      "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
-      requestOptions
-    );
-    const data = (await apiResponse.json()) || { response: {} };
+    const apiResponse = await fetch('https://ryno-v2-cedo4cgxka-de.a.run.app/chat', requestOptions);
+    const data = await apiResponse.json();
     setResponse(data.response);
 
     // Display the response from the API
@@ -300,4 +297,3 @@ const App = () => {
 };
 
 export default App;
-
