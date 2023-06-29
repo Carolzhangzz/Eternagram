@@ -1,4 +1,5 @@
 import requests
+import time
 
 user_id = "latisha"  # Replace with your user_id
 
@@ -15,7 +16,13 @@ def send_receive_messages(url):
         print(f"Status code: {response.status_code}")
         print(f"Raw response: {response.text}")
         try:
-            print(f"Received: {response.json()['response']}")
+            res= response.json()['response']
+            if isinstance(res, list):
+                for message in res:
+                    print(f"Ryno: {message}")
+                    time.sleep(1) # for delay in between responses
+            else:
+                print(f"Ryno: {res}")
         except requests.exceptions.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
 

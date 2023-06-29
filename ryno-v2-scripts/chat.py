@@ -18,6 +18,8 @@ GPT4_MODEL = 'gpt-4'
 def prologue(user_input, step):
     # """Prologue"""
 
+    print(f"The step is {step}")
+    
     if step == 1:
         # Handle first user input
         res = "y..."
@@ -36,10 +38,9 @@ def prologue(user_input, step):
         # Handle the third user input
         if "yes" in user_input.lower():
             res = [
-                "Ryno: Yes! the word, the language! I need help.",
-                "[Unknown sender]: I have lost all of my data and I require your assistance.",
-                """[Unknown sender]: I believe that linguistic input is the only way to retrieve the lost information, 
-                so would you will be willing to engange in a conversation with me to help recover the memory?"""
+                "Yes! the word, the language! I need help.",
+                "I have lost all of my data and I require your assistance.",
+                """I believe that linguistic input is the only way to retrieve the lost information, so would you will be willing to engange in a conversation with me to help recover the memory?"""
             ]
             next_step = step + 1
             scene = 'scene1'
@@ -179,15 +180,15 @@ def scene2_trigger(user_input: str) -> bool:
 
 def scene2_animation():
     """Scene 2 Animation"""
-    print("Emmmmm....")
-    time.sleep(0.5)
-    print("I sense something, something profound. I'm trying to recall why the catastrophe happened.")
-    time.sleep(1)
-    print("I might need more permission to access this part of my memory. I believe you are on the right track.")
-    time.sleep(1)
-    print("Understanding why the catastrophe happened is critical to my memory recovery. Perhaps, it can even help me answer who I am.")
-    time.sleep(1)
-    print("Please, help jog my memory by asking more questions related to this topic.")
+    res = [
+        "Emmmmm....",
+        "I sense something, something profound. I'm trying to recall why the catastrophe happened.",
+        "I might need more permission to access this part of my memory. I believe you are on the right track.",
+        "Understanding why the catastrophe happened is critical to my memory recovery. Perhaps, it can even help me answer who I am.",
+        "Please, help jog my memory by asking more questions related to this topic."
+    ]
+
+    return res
 
 def scene2(user_input, user_id, vector):
     """Scene 2: """
@@ -311,8 +312,15 @@ def process_message(user_id, message):
 
     print(f"Scene {scene} took {time.time() - scene_start_time} seconds")
 
-    # update the next step
+    # update the next step and scene
     step = next_step
+
+    # Merge all in one string if the res is a list
+    if isinstance(res, list):
+        result = ''
+        for r in res:
+            result += f'\n{r}'
+        res = result
 
     # Save Ryno's response, vectorize, save, etc
     timestamp = time.time()
@@ -322,7 +330,7 @@ def process_message(user_id, message):
     vector = openai_api.gpt3_embeddings(message)
     print(f"Vector generation for response took {time.time() - vector_start_time} seconds")
     unique_id = str(uuid4())
-    metadata = {'speaker': 'Ryno', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id, 'step': next_step, 'scene': scene}
+    metadata = {'speaker': 'Ryno', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id, 'step': step, 'scene': scene}
     storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
     payload.append((unique_id, vector, metadata))
     vdb.upsert(payload)

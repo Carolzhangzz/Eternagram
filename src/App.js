@@ -79,7 +79,7 @@ const App = () => {
     };
 
     const apiResponse = await fetch(
-      "https://ryno-v2-cedo4cgxka-de.a.run.app/chat",
+      "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
       requestOptions
     );
     const data = await apiResponse.json();
