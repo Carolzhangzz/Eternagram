@@ -6,6 +6,8 @@ import re
 from time import time, sleep
 import google.cloud.storage as google_storage
 from google.oauth2 import service_account
+from google.cloud.exceptions import NotFound
+
 import openai
 import pinecone
 import datetime
@@ -71,6 +73,42 @@ class CloudStorage:
     def save_file(self, filepath, payload):
         blob = self.bucket.blob(filepath)
         blob.upload_from_string(payload)
+
+    # Get the latest file from GCS
+    def get_latest_file(self, user_id):
+        # Get the list of all blobs in the specified user_id directory
+        blobs = self.bucket.list_blobs(prefix=f'path/to/nexus/{user_id}')
+
+        # Initialize the latest_blob
+        latest_blob = None
+
+        for blob in blobs:
+            # Discard any directories (as they have no 'updated' attribute)
+            if not blob.name.endswith("/"):
+                # Always select the first blob as the latest blob 
+                if latest_blob is None:
+                    latest_blob = blob
+                # Select the blob with the latest 'updated' attribute
+                elif blob.updated > latest_blob.updated:
+                    latest_blob = blob
+
+        # now, latest_blob is the most recent blob for the user_id
+        if latest_blob is not None:
+            try:
+                # To get metadata (dict)
+                metadata = dict(latest_blob.metadata or {})
+
+                # To download the blob as string
+                json_string = latest_blob.download_as_text()
+
+                return metadata, json_string
+            except NotFound:
+                print(f"No such object: {latest_blob.name}")
+                return None, None
+        else:
+            print(f"No files found for user: {user_id}")
+            return None, None
+
 
 # Class to use embeddings and completions
 class OpenAI:

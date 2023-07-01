@@ -7,6 +7,7 @@ import openai
 from dotenv import load_dotenv
 import time
 from uuid import uuid4
+import json
 
 load_dotenv()
 
@@ -17,8 +18,6 @@ GPT4_MODEL = 'gpt-4'
 # FUNCTION: PROLOGUE
 def prologue(user_input, step):
     # """Prologue"""
-
-    print(f"The step is {step}")
     
     if step == 1:
         # Handle first user input
@@ -97,18 +96,22 @@ def scene1_animation():
     ]
     return res
 
-def scene1(user_input, user_id, vector):
+def scene1(user_input, user_id, vector, step):
     """Scene 1: Ryno is having memory lost"""
 
-    # Set the default scene
+    # Set the defaults
     scene = 'scene1'
     convo_length = 15
+    context = ""
+    conversation = ""
 
-    # Search for relevant messages, and generate a response
-    results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
-    conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
-    docs = docsearch.similarity_search(user_input, k=3, include_metadata=True)
-    context = ' '.join(doc.page_content for doc in docs)
+    # if the user has talk about anything starting from scene1 -> messages stored.
+    if step > 4:
+        # Search for relevant messages, and generate a response
+        results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
+        conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
+        docs = docsearch.similarity_search(user_input, k=3)
+        context = ' '.join(doc.page_content for doc in docs)
 
     # Prompt 1
     prompt1 = f"""
@@ -133,7 +136,10 @@ def scene1(user_input, user_id, vector):
         scene1_animation()
         scene = 'scene2'
 
-    return scene, res
+    # Update the step
+    next_step = step + 1
+
+    return scene, res, next_step
 
 
 # FUNCTION: SCENE 2
@@ -189,18 +195,22 @@ def scene2_animation():
 
     return res
 
-def scene2(user_input, user_id, vector):
+def scene2(user_input, user_id, vector, step):
     """Scene 2: """
 
     # Set the default scene
     scene = 'scene2'
     convo_length = 15
+    context = ""
+    conversation = ""
 
-    # Search for relevant messages, and generate a response
-    results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
-    conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
-    docs = docsearch.similarity_search(user_input, k=3, include_metadata=True)
-    context = ' '.join(doc.page_content for doc in docs)
+    # if the user has talk about anything starting from scene1 -> messages stored.
+    if step > 4:
+        # Search for relevant messages, and generate a response
+        results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
+        conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
+        docs = docsearch.similarity_search(user_input, k=3)
+        context = ' '.join(doc.page_content for doc in docs)
 
     # Generate first response to cue users to talk
     prompt2 = f"""
@@ -225,20 +235,27 @@ def scene2(user_input, user_id, vector):
         scene2_animation()
         scene = 'scene3'
 
-    return scene, res
+    # Update the step
+    next_step = step + 1
+
+    return scene, res, next_step
 
 
 # FUNCTION: SCENE 3
-def scene3(user_input, user_id, vector):
+def scene3(user_input, user_id, vector, step):
     """Scene 3: """
 
     convo_length = 15
+    context = ""
+    conversation = ""
 
-    # Search for relevant messages, and generate a response
-    results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
-    conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
-    docs = docsearch.similarity_search(user_input, k=3, include_metadata=True)
-    context = ' '.join(doc.page_content for doc in docs)
+    # if the user has talk about anything starting from scene1 -> messages stored.
+    if step > 4:
+        # Search for relevant messages, and generate a response
+        results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
+        conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
+        docs = docsearch.similarity_search(user_input, k=3)
+        context = ' '.join(doc.page_content for doc in docs)
 
     # Generate first response to cue users to talk
     prompt3 = f"""
@@ -247,7 +264,7 @@ def scene3(user_input, user_id, vector):
     about why things happened in your world. Use the context below to answer what happened to your world.
 
     CONTEXT:
-    {context}
+    {context} d
 
     PAST CONVERSATIONS:
     {conversation}
@@ -257,7 +274,10 @@ def scene3(user_input, user_id, vector):
     # Generate first response to cue for user_input
     res = openai_api.gpt4_completion(prompt3, user_id, user_input, tokens=100, temp=0.5)
 
-    return res
+    # Update the step
+    next_step = step + 1
+
+    return res, next_step
 
 
 # FUNCTION: PROCESS MESSAGE
@@ -274,16 +294,11 @@ def process_message(user_id, message):
     unique_id = str(uuid4())
 
     # Retrieve the latest conversation metadata
-    retrieval_start_time = time.time()
-    results = vdb.query(vector=vector, top_k=1, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
-    print(f"Retrieval took {time.time() - retrieval_start_time} seconds")
-    if results['matches']:
-        latest_conversation = storage.load_json('path/to/nexus/%s/%s.json' % (user_id, results['matches'][0]['id']))
-    else:
-        latest_conversation = None
+    metadata, latest_conversation_json = storage.get_latest_file(user_id)
 
     # Load latest step and scene
-    if latest_conversation:
+    if latest_conversation_json:
+        latest_conversation = json.loads(latest_conversation_json)
         step = latest_conversation['step']
         scene = latest_conversation['scene']
     else:
@@ -291,25 +306,19 @@ def process_message(user_id, message):
         step = 1
         scene = 'prologue'
 
-    # store the json, and vectors to db
-    metadata = {'speaker': 'You', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id, 'step': step, 'scene': scene}
-    storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
-    payload.append((unique_id, vector, metadata))
-
-    scene_start_time = time.time()
     if scene == 'prologue':
         scene, res, next_step = prologue(message, step)
     elif scene == 'scene1':
-        scene, res = scene1(message, user_id, vector)
+        scene, res, next_step = scene1(message, user_id, vector, step)
     elif scene == 'scene2':
-        scene, res = scene2(message, user_id, vector)
+        scene, res, next_step = scene2(message, user_id, vector, step)
     elif scene == 'scene3':
         res = scene3(message, user_id, vector)
     else:
         print("Invalid scene")
         return "You are in invalid scene"
-
-    print(f"Scene {scene} took {time.time() - scene_start_time} seconds")
+    
+    print(f"The scene is now {scene}, and step is now {step}")
 
     # update the next step and scene
     step = next_step
@@ -320,6 +329,11 @@ def process_message(user_id, message):
         for r in res:
             result += f'\n{r}'
         res = result
+
+    # Save user message
+    metadata = {'speaker': 'You', 'time': timestamp, 'message': message, 'timestring': timestring, 'uuid': unique_id, 'user_id': user_id, 'step': step, 'scene': scene}
+    storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
+    payload.append((unique_id, vector, metadata))
 
     # Save Ryno's response, vectorize, save, etc
     timestamp = time.time()
