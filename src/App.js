@@ -160,7 +160,7 @@ const App = () => {
           </div>
         </div>
       </div>
-      <div style={{ width: "100%", height: "0%"，flex :'1' }}>
+      <div style={{ width: "100%", height: "0%",flex:'1' }}>
         <MainContainer>
           <ChatContainer>
             <MessageList
