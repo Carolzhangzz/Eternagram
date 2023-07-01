@@ -6,29 +6,21 @@ import {
   ChatContainer,
   MessageList,
   Message,
-  MessageInput,
   TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
-// import image01 from './image01.jpeg';
-// import image02 from './image02.jpeg';
-// import audio01 from './audio01.mp3';
-// import audio02 from './audio02.mp3';
 import axios from "axios";
 
-let firstclick = false;
-
 const App = () => {
-  var findimg = "";
-  //the status flag is used to identify the status of images
-  var status = 1;
-  // Constants
   const [userId, setUserId] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [response, setResponse] = useState("");
+  const [firstClick, setFirstClick] = useState(true);
   const [typing, setTyping] = useState(false);
 
-  // A function to split sentences to shorter messages
+  // Define status and finimg in the component's state
+  const [status, setStatus] = useState(1);
+  const [findimg, setFindimg] = useState("");
+
   function splitSentences(responseText) {
     const parts = responseText.split(/(\[.*?\])/g);
     const messages = [];
@@ -53,154 +45,108 @@ const App = () => {
     return messages;
   }
 
-  // A function to handle send
   const handleSend = async (message) => {
+    setMessage(""); 
+    
     const newMessage = {
       message: message,
       sender: "user",
       direction: "outgoing",
     };
 
-    // new array of messages
-    const newMessages = [...messages, newMessage]; // all the old messages, + the new messages
+    if (firstClick) {
+      setUserId(message);
+      setFirstClick(false);
+    } else {
 
-    // Update our messages state
-    setMessages(newMessages);
+      // new array of messages
+      const newMessages = [...messages, newMessage];
 
-    // Set a typing indicator (Ryno is typing...)
-    setTyping(true);
+      // Update our messages state
+      setMessages(newMessages);
 
-    return;
-    // Send the message to your API
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, message: message }),
-    };
+      // Set a typing indicator (Ryno is typing...)
+      setTyping(true);
 
-    const apiResponse = await fetch(
-      "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
-      requestOptions
-    );
-    const data = await apiResponse.json();
-    setResponse(data.response);
+      try {
+        // Send the message to the API
+        const requestOptions = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, message: message }),
+        };
 
-    // Display the response from the API
-    const separatedMessages = splitSentences(data.response);
+        const apiResponse = await fetch(
+          "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
+          requestOptions
+        );
 
-    const sendSeparatedMessages = async () => {
-      for (const message of separatedMessages) {
-        setTyping(true);
-
-        // Show Ryno typing indicator between messages
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        //A function to match images in the database
-        //Status is a mark, can prevent the picture from being repeated;
-        if (status == 1) {
-          //set up port mapping to my backend
-          axios
-            .get("https://46601y073r.imdo.co/picture/in?message=" + findimg)
-            .then((res) => {
-              if (res.data) {
-                if (status == 1) {
-                  //if it matches,and it was the first time to send
-                  console.log("return value judgment：", res);
-                  const newMessageWithChatGPT1 = {
-                    message:
-                      "<img width='250'  height='250' src='https://46601y073r.imdo.co/picture/getjpg1?message=" +
-                      findimg +
-                      "'/>",
-                    sender: "ChatGPT",
-                    direction: "ingoing",
-                  };
-                  setMessages((prevMessages) => [
-                    ...prevMessages,
-                    newMessageWithChatGPT1,
-                  ]);
-                  status = 0;
-                }
-              }
-            });
+        if (!apiResponse.ok) {
+          console.log(apiResponse.statusText);
+          throw new Error(`HTTP error! status: ${apiResponse.status}`);
         }
+          
+        const data = await apiResponse.json();
 
-        const newMessageWithChatGPT = {
-          message: message,
-          sender: "ChatGPT",
-          direction: "ingoing",
+        if (data && data.response) {
+          // Display the response from the API
+          const separatedMessages = splitSentences(data.response);
+
+          const sendSeparatedMessages = async () => {
+            for (const message of separatedMessages) {
+              setTyping(true);
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+              // Call image api only when status is set to 1
+              if (status === 1) {
+                try {
+                  const res = await axios.get(
+                    "https://46601y073r.imdo.co/picture/in?message=" + findimg
+                  );
+    
+                  // If we obtained data, add image messsage and set status to 0
+                  if (res.data && status === 1) {
+                    console.log("return value judgment：", res);
+                    const newMessageWithChatGPT1 = {
+                      message:
+                        "<img width='250'  height='250' src='https://46601y073r.imdo.co/picture/getjpg1?message=" +
+                        findimg +
+                        "'/>",
+                      sender: "ChatGPT",
+                      direction: "ingoing",
+                    };
+                    setMessages((prevMessages) => [
+                      ...prevMessages,
+                      newMessageWithChatGPT1,
+                    ]);
+                    setStatus(0);
+                  }
+              } catch (err) {
+                console.log(err);
+              }
+            }
+  
+            const newMessageWithChatGPT = {
+              message: message,
+              sender: "ChatGPT",
+              direction: "ingoing",
+            };
+  
+            setMessages((prevMessages) => [...prevMessages, newMessageWithChatGPT]);
+            setTyping(false);
+          }
         };
-
-        setMessages((prevMessages) => [...prevMessages, newMessageWithChatGPT]);
+  
+        await sendSeparatedMessages();
         setTyping(false);
+        // setMessage("");
       }
-    };
-
-    await sendSeparatedMessages();
-
-    // hide the typing indicator after receiving the response
-    setTyping(false);
-
-    // Clear the input field
-    setMessage("");
+      } catch (err) {
+        console.error('Error:', err);
+      } 
+    }
   };
 
-  // A function to handle send with user id
-  const handleSenduserid = async (message) => {
-    const newMessage = {
-      message: message,
-      sender: "user",
-      direction: "outgoing",
-    };
-
-    // new array of messages
-    const newMessages = [...messages, newMessage]; // all the old messages, + the new messages
-
-    // Update our messages state
-    setUserId(newMessages);
-
-    // Set a typing indicator (Ryno is typing...)
-    // TODO: It is recommended Ryno give a prologue when the user first click submmit button
-    setTyping(true);
-
-    // Send the message to your API
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, message: message }),
-    };
-
-    const apiResponse = await fetch('https://ryno-v2-cedo4cgxka-de.a.run.app/chat', requestOptions);
-    const data = await apiResponse.json();
-    setResponse(data.response);
-
-    // Display the response from the API
-    const separatedMessages = splitSentences(data.response);
-
-    const sendSeparatedMessages = async () => {
-      for (const message of separatedMessages) {
-        setTyping(true);
-
-        // Show Ryno typing indicator between messages
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const newMessageWithChatGPT = {
-          message: message,
-          sender: "ChatGPT",
-          direction: "ingoing",
-        };
-
-        setMessages((prevMessages) => [...prevMessages, newMessageWithChatGPT]);
-        setTyping(false);
-      }
-    };
-
-    await sendSeparatedMessages();
-
-    // hide the typing indicator after receiving the response
-    setTyping(false);
-
-    // Clear the input field
-    setMessage("");
-  };
 
   return (
     <div className="chatBox">
@@ -244,7 +190,7 @@ const App = () => {
             <input
               id="input"
               type="text"
-              placeholder="please input your id first"
+              placeholder={userId ? "Please input your message" : "Please input your id first"}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
@@ -260,13 +206,11 @@ const App = () => {
                 value="Send"
                 onClick={(e) => {
                   e.preventDefault();
-                  // handleSend(message);
-                  findimg = message;
-                  status = 1;
-                  //Message is obtained from the input box,
+                  setFindimg(message);
+                  setStatus(1);
+                  // Message is obtained from the input box,
                   //as a global variable, obtained in the sending method
                   handleSend(message);
-                  removementionandsenduserid();
                 }}
               />
             </div>
@@ -276,24 +220,6 @@ const App = () => {
       {/* <p>Response: {response}</p> */}
     </div>
   );
-
-  function removementionandsenduserid() {
-    // test
-
-    return;
-    let mention = document.getElementById("mention");
-    let input = document.getElementById("input");
-    if (!firstclick) {
-      firstclick = true;
-      // return
-      // Remove the text from the page
-      mention.remove();
-      handleSenduserid(message);
-    } else {
-      handleSend(message);
-    }
-    input.value = "";
-  }
 };
 
 export default App;

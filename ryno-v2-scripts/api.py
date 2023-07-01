@@ -9,15 +9,9 @@ logger = logging.getLogger(__name__)
 
 api = FastAPI()
 
-origins = [
-    "https://ryno-v2-cedo4cgxka-de.a.run.app",  # Your API domain
-    "http://localhost:8000",
-    # Add other domains as needed
-]
-
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

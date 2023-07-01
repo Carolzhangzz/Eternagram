@@ -27,5 +27,5 @@ def send_receive_messages(url):
             print(f"Error decoding JSON: {e}")
 
 if __name__ == "__main__":
-    # send_receive_messages("https://ryno-v2-cedo4cgxka-de.a.run.app/message")
-    send_receive_messages("http://localhost:8000/message")
+    send_receive_messages("https://ryno-v2-cedo4cgxka-de.a.run.app/message")
+    # send_receive_messages("http://localhost:8000/message")

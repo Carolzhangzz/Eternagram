@@ -23,7 +23,6 @@ def prologue(user_input, step):
     if step == 1:
         # Handle first user input
         res = "y..."
-        time.sleep(1)
         res += " e..."
         next_step = step + 1
         scene = 'prologue'
