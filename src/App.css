@@ -104,15 +104,15 @@
 @media screen and (min-width: 800px) {
   .headerBox,
   .inputForm {
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 1);
   }
   .chatBox {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.8);
     border: solid 1px #d1dbe3;
-    max-width: 400px;
-    width: 100vw;
+    max-width: 1000px;
+    width: 200vw;
     position: absolute;
-    right: 15%;
+    right: 17%;
     height: 80vh;
     margin-top: 10vh;
   }
