@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chat import process_message
+from typing import Union, List
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +23,7 @@ class MessageInput(BaseModel):
     message: str
 
 class MessageOutput(BaseModel):
-    response: str
+    response: Union[str, List[str]]
 
 @api.post("/message", response_model=MessageOutput)
 def process_message_endpoint(message_input: MessageInput) -> MessageOutput:

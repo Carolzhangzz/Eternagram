@@ -1,7 +1,7 @@
 import requests
 import time
 
-user_id = "dothisornot"  # Replace with your user_id
+user_id = "latisha"  # Replace with your user_id
 
 def send_receive_messages(url):
     while True:
@@ -26,5 +26,5 @@ def send_receive_messages(url):
             print(f"Error decoding JSON: {e}")
 
 if __name__ == "__main__":
-    # send_receive_messages("https://ryno-v2-cedo4cgxka-de.a.run.app/message")
-    send_receive_messages("http://localhost:8000/message")
+    send_receive_messages("https://ryno-v2-cedo4cgxka-de.a.run.app/message")
+    # send_receive_messages("http://localhost:8000/message")
