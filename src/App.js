@@ -59,6 +59,7 @@ const App = () => {
     if (firstClick) {
       setUserId(message);
       setFirstClick(false);
+
     } else {
       // new array of messages
       const newMessages = [...messages, newMessage];
@@ -146,7 +147,6 @@ const App = () => {
 
           await sendSeparatedMessages();
           setTyping(false);
-          // setMessage("");
         }
       } catch (err) {
         console.error("Error:", err);
@@ -236,7 +236,7 @@ const App = () => {
                 value="Send"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (message == "") return;
+                  if (message === "") return;
                   setFindimg(message);
                   setStatus(1);
                   handleSend(message);

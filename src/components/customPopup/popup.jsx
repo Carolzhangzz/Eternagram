@@ -6,7 +6,7 @@ const Popup = ({ isShow, closeEvent }) => {
   const [value, setValue] = useState("");
 
   const closePopup = () => {
-    if (value.trim() == "") return;
+    if (value.trim() === "") return;
     const data = popupRef.current.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 300,
       iterations: 1,
@@ -27,9 +27,9 @@ const Popup = ({ isShow, closeEvent }) => {
       document.addEventListener("keyup", detectTabKey);
 
       function detectTabKey(e) {
-        if (e.keyCode == 9) {
+        if (e.keyCode === 9) {
           const activeElem = document.activeElement;
-          if (activeElem.className == "confirm") {
+          if (activeElem.className === "confirm") {
             console.log(activeElem.href);
             return;
           }
@@ -63,7 +63,7 @@ const Popup = ({ isShow, closeEvent }) => {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => {
-                if (e.code == "Enter") closePopup();
+                if (e.code === "Enter") closePopup();
               }}
               placeholder="Please input your id"
             />
