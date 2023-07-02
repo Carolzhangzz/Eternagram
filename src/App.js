@@ -8,6 +8,8 @@ import {
   Message,
   TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
+
+import CustomPopup from "./components/customPopup/popup";
 import axios from "axios";
 
 const App = () => {
@@ -16,11 +18,11 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [firstClick, setFirstClick] = useState(true);
   const [typing, setTyping] = useState(false);
+  const [isShowPopup, setIsShowPopup] = useState(false);
 
   // Define status and finimg in the component's state
   const [status, setStatus] = useState(1);
   const [findimg, setFindimg] = useState("");
-
   function splitSentences(responseText) {
     const parts = responseText.split(/(\[.*?\])/g);
     const messages = [];
@@ -46,8 +48,8 @@ const App = () => {
   }
 
   const handleSend = async (message) => {
-    setMessage(""); 
-    
+    setMessage("");
+
     const newMessage = {
       message: message,
       sender: "user",
@@ -58,7 +60,6 @@ const App = () => {
       setUserId(message);
       setFirstClick(false);
     } else {
-
       // new array of messages
       const newMessages = [...messages, newMessage];
 
@@ -77,8 +78,7 @@ const App = () => {
         };
 
         const apiResponse = await fetch(
-          // "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
-          "http://localhost:8000/message",
+          "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
           requestOptions
         );
 
@@ -86,29 +86,25 @@ const App = () => {
           console.log(apiResponse.statusText);
           throw new Error(`HTTP error! status: ${apiResponse.status}`);
         }
-          
+
         const data = await apiResponse.json();
 
         if (data && data.response) {
-          // If single response, convert it to an array containing single element.
-          let responses = Array.isArray(data.response) ? data.response : [data.response];
+          // Display the response from the API
+          const separatedMessages = splitSentences(data.response);
 
-          // Apply splitSentences on each response and flatten the result.
-          responses = responses.flatMap(response => splitSentences(response));
-
-          // const separatedMessages = splitSentences(data.response);
           const sendSeparatedMessages = async () => {
-            for (const message of responses) {
+            for (const message of separatedMessages) {
               setTyping(true);
               await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
               // Call image api only when status is set to 1
               if (status === 1) {
                 try {
                   const res = await axios.get(
                     "https://46601y073r.imdo.co/picture/in?message=" + findimg
                   );
-      
+
                   // If we obtained data, add image messsage and set status to 0
                   if (res.data && status === 1) {
                     console.log("return value judgment：", res);
@@ -118,7 +114,7 @@ const App = () => {
                         findimg +
                         "'/>",
                       sender: "ChatGPT",
-                      direction: "incoming",
+                      direction: "ingoing",
                     };
                     setMessages((prevMessages) => [
                       ...prevMessages,
@@ -126,35 +122,51 @@ const App = () => {
                     ]);
                     setStatus(0);
                   }
-              } catch (err) {
-                console.error('Error Message:', err.message);
-                console.error('Error Object:', err);
+                } catch (err) {
+                  console.log(err);
+                }
               }
-            }
-    
-            const newMessageWithChatGPT = {
-              message: message,
-              sender: "ChatGPT",
-              direction: "incoming",
-            };
-    
-            setMessages((prevMessages) => [...prevMessages, newMessageWithChatGPT]);
-            setTyping(false);
+
+              const newMessageWithChatGPT = {
+                message: message,
+                sender: "ChatGPT",
+                direction: "ingoing",
+              };
+
+              setMessages((prevMessages) => [
+                ...prevMessages,
+                newMessageWithChatGPT,
+              ]);
+              setTyping(false);
             }
           };
-    
+
           await sendSeparatedMessages();
           setTyping(false);
+          // setMessage("");
         }
       } catch (err) {
-        console.error('Error:', err);
-      } 
+        console.error("Error:", err);
+      }
     }
   };
 
+  const [isShowPopupDisplayed, setIsShowPopupDisplayed] = useState(false);
+  const closePopup = (value) => {
+    setFindimg(value);
+    setStatus(1);
+    handleSend(value);
+
+    setIsShowPopup(false);
+    setIsShowPopupDisplayed(true);
+    document.querySelector("#input").focus();
+  };
 
   return (
     <div className="chatBox">
+      {!isShowPopupDisplayed && (
+        <CustomPopup isShow={isShowPopup} closeEvent={closePopup} />
+      )}
       <div className="headerBox">
         <div className="header">
           <div>
@@ -165,7 +177,7 @@ const App = () => {
           </div>
         </div>
       </div>
-      <div style={{ width: "100%", height: "0%",flex:'1' }}>
+      <div style={{ width: "100%", height: "0%", flex: "1" }}>
         <MainContainer>
           <ChatContainer>
             <MessageList
@@ -195,8 +207,18 @@ const App = () => {
             <input
               id="input"
               type="text"
-              placeholder={userId ? "Please input your message" : "Please input your id first"}
+              placeholder={
+                userId
+                  ? "Please input your message"
+                  : "Please input your id first"
+              }
               value={message}
+              onFocus={(e) => {
+                if (!isShowPopupDisplayed) {
+                  document.querySelector("#input").blur();
+                  setIsShowPopup(true);
+                }
+              }}
               onChange={(e) => setMessage(e.target.value)}
             />
 
@@ -211,11 +233,11 @@ const App = () => {
                 value="Send"
                 onClick={(e) => {
                   e.preventDefault();
+                  if (message == "") return;
                   setFindimg(message);
                   setStatus(1);
-                  // Message is obtained from the input box,
-                  //as a global variable, obtained in the sending method
                   handleSend(message);
+                  document.querySelector("#input").focus();
                 }}
               />
             </div>
