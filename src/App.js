@@ -77,8 +77,7 @@ const App = () => {
         };
 
         const apiResponse = await fetch(
-          // "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
-          "http://localhost:8000/message",
+          "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
           requestOptions
         );
 
