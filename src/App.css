@@ -2,12 +2,21 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100vw;
+  --main--color: #4b8efe;
+  --main--color2: #2752ff;
 }
-
+.cs-message .cs-message__content ,
 .cs-message.cs-message--outgoing .cs-message__content {
-  border-radius: 100px;
-  background-color: #4b8efe;
+  border-radius: 1.2em;
+  background-color: var(--main--color);
   color: white;
+}
+.cs-message-list__typing-indicator-container .cs-typing-indicator__text{
+  color: var(--main--color2);
+}
+.cs-typing-indicator__indicator>div{
+  background-color: var(--main--color2);
 }
 .chatBox .cs-main-container {
   border-right-width: 0;
@@ -31,6 +40,7 @@
 }
 .header > div:first-child div {
   flex: 1;
+  line-height: 2em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -58,7 +68,6 @@
   height: 48px;
   padding: 8px;
   box-sizing: border-box;
-  padding-right: 18px;
 }
 .inputBox input {
   height: 100%;
@@ -68,15 +77,23 @@
   outline: 0;
   flex: 1;
   background-color: transparent;
+  min-width: 0px;
 }
+input#button[type="submit"],
 .inputBox input[type="submit"] {
-  background: linear-gradient(#0033ff, #4e92fe);
+  background: linear-gradient(var(--main--color2), var(--main--color));
   border-radius: 100px;
   color: #fff;
   line-height: 0.95em;
+  padding: 11px 1.1em;
+  cursor: pointer;
+}
+.inputBox input[type="submit"]:active {
+  background: linear-gradient(var(--main--color2), var(--main--color));
+  opacity: 0.8;
 }
 .inputBox .leftIcon {
-  background: linear-gradient(#0033ff, #4e92fe);
+  background: linear-gradient(var(--main--color2), var(--main--color));
   border-radius: 100px;
   height: 34px;
   width: 34px;
@@ -101,7 +118,7 @@
   line-height: 0;
 }
 
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 1000px) {
   .headerBox,
   .inputForm {
     background-color: rgba(255, 255, 255, 1);
@@ -109,15 +126,11 @@
   .chatBox {
     background: rgba(255, 255, 255, 0.8);
     border: solid 1px #d1dbe3;
-    max-width: 1000px;
-    width: 200vw;
-    position: absolute;
-    right: 17%;
+    /* max-width: 1000px; */
+    width: 90vw;
     height: 80vh;
-    margin-top: 10vh;
   }
   body {
-    /* background-color: red; */
     background-image: url(./bg.jpg);
     background-size: cover;
     height: 100vh;
@@ -129,6 +142,9 @@
   }
 }
 
-/* .cs-message-input__content-editor-wrapper{
-  
-} */
+
+@media screen and (min-width: 1300px) {
+  .chatBox {
+    max-width: 1000px;
+  }
+}
