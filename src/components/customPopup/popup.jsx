@@ -7,7 +7,7 @@ const Popup = ({ isShow, closeEvent }) => {
   const [code, setCode] = useState("");
 
   const closePopup = () => {
-	if (value.trim() === "") return;
+	//if (value.trim() === "") return;
     if (username.trim() === "" || code.trim() === "") return;
     const data = popupRef.current.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 300,
