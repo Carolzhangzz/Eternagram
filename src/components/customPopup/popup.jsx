@@ -3,34 +3,34 @@ import { useState, useRef, useEffect } from "react";
 
 const Popup = ({ isShow, closeEvent }) => {
   const popupRef = useRef(0);
-  const [value, setValue] = useState("");
+  const [username, setUsername] = useState("");
+  const [code, setCode] = useState("");
 
   const closePopup = () => {
-    if (value.trim() === "") return;
+	if (value.trim() === "") return;
+    if (username.trim() === "" || code.trim() === "") return;
     const data = popupRef.current.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 300,
       iterations: 1,
       easing: "ease-out",
     });
     data.onfinish = (e) => {
-      closeEvent(value);
+      closeEvent(username,code);
     };
   };
   useEffect(() => {
     if (isShow) {
-      popupRef.current.animate([{ opacity: 0 }, { opacity: 1 }], {
-        duration: 200,
+      popupRef.current.animate([{ opacity: 1 }], {
+        duration: 0,
         iterations: 1,
         fill: "forwards",
-        easing: "ease-in",
       });
       document.addEventListener("keyup", detectTabKey);
 
       function detectTabKey(e) {
         if (e.keyCode === 9) {
           const activeElem = document.activeElement;
-          if (activeElem.className === "confirm") {
-            console.log(activeElem.href);
+          if (activeElem.className=== "confirm") {
             return;
           }
           document.querySelector(".confirm").focus();
@@ -49,30 +49,31 @@ const Popup = ({ isShow, closeEvent }) => {
       >
         <div className="popup">
           <div className="popup-header">
-            <b>Please enter your id before starting the game!!!</b>
+            <img src="/logo.png" alt="" />
+            {/* <b>Please enter your id before starting the game!!!</b> */}
           </div>
           <div className="popup-content">
-            <div>Notice:</div>
-            {/* <p>1. The first information you enter will become your user ID</p> */}
-            <p>
-              Please remember this id and enter the same id before each start to
-              prevent the loss of previous game records
-            </p>
             <input
               type="text"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="user name"
+            />
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
               onKeyDown={(e) => {
                 if (e.code === "Enter") closePopup();
               }}
-              placeholder="Please input your id"
+              placeholder="pin code"
             />
           </div>
           <div className="popup-footer">
             {/* <button className='cancel'>Ok,i already know</button> */}
             <button className="confirm" onClick={closePopup}>
               {/* Ok,i already know */}
-              Start
+              Log in
             </button>
           </div>
         </div>
@@ -82,3 +83,4 @@ const Popup = ({ isShow, closeEvent }) => {
 };
 
 export default Popup;
+
