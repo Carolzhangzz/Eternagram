@@ -5,12 +5,18 @@
   width: 100vw;
   --main--color: #4b8efe;
   --main--color2: #2752ff;
+  --main--color3: #EFEFEF;
 }
 .cs-message .cs-message__content ,
 .cs-message.cs-message--outgoing .cs-message__content {
   border-radius: 1.2em;
   background-color: var(--main--color);
   color: white;
+}
+.cs-message .cs-message__content{
+  border-radius: 1.2em;
+  background-color: var(--main--color3);
+  color: black;
 }
 .cs-message-list__typing-indicator-container .cs-typing-indicator__text{
   color: var(--main--color2);
@@ -78,6 +84,7 @@
   flex: 1;
   background-color: transparent;
   min-width: 0px;
+  font-size: 16px;
 }
 input#button[type="submit"],
 .inputBox input[type="submit"] {
@@ -87,6 +94,7 @@ input#button[type="submit"],
   line-height: 0.95em;
   padding: 11px 1.1em;
   cursor: pointer;
+  font-size: 14px;
 }
 .inputBox input[type="submit"]:active {
   background: linear-gradient(var(--main--color2), var(--main--color));
@@ -116,6 +124,30 @@ input#button[type="submit"],
 .inputBox .rightIcon img {
   height: 24px;
   line-height: 0;
+}
+ 
+body {
+  font-size: 16px;
+  background-image: url(./bg.jpg);
+  background-size: cover;
+  height: 100vh;
+}
+.headerBox,
+.inputForm {
+  background-color: rgba(255, 255, 255, 1);
+}
+.chatBox {
+  background: rgba(255, 255, 255, 0.8);
+  border: solid 1px #d1dbe3;
+  border-radius: 25px;
+  overflow: hidden;
+  height: 95vh;
+  width: 95vw;
+}
+.cs-main-container,
+.cs-chat-container,
+.cs-message-list,.cs-typing-indicator {
+  background: transparent !important;
 }
 
 @media screen and (min-width: 1000px) {
