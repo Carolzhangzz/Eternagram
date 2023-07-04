@@ -18,7 +18,7 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [firstClick, setFirstClick] = useState(true);
   const [typing, setTyping] = useState(false);
-  const [isShowPopup, setIsShowPopup] = useState(false);
+  const [isShowPopup, setIsShowPopup] = useState(true);
 
   // Define status and finimg in the component's state
   const [status, setStatus] = useState(1);
