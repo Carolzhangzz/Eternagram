@@ -106,7 +106,7 @@ const App = () => {
               if (status === 1) {
                 try {
                   const res = await axios.get(
-                    "https://46601y073r.imdo.co/picture/in?message=" + findimg
+                    "https://2dde-115-208-95-142.jp.ngrok.io/picture/in?message=" + findimg
                   );
 
                   // If we obtained data, add image messsage and set status to 0
@@ -114,7 +114,7 @@ const App = () => {
                     console.log("return value judgment：", res);
                     const newMessageWithChatGPT1 = {
                       message:
-                        "<img width='250'  height='250' src='https://46601y073r.imdo.co/picture/getjpg1?message=" +
+                        "<img width='250'  height='250' src='https://2dde-115-208-95-142.jp.ngrok.io/picture/getjpg1?message=" +
                         findimg +
                         "'/>",
                       sender: "ChatGPT",
