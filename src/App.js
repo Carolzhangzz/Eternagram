@@ -14,10 +14,11 @@ import axios from "axios";
 
 const App = () => {
   const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [firstClick, setFirstClick] = useState(true);
   const [typing, setTyping] = useState(false);
+  const [isShowPopupDisplayed, setIsShowPopupDisplayed] = useState(false);
   const [isShowPopup, setIsShowPopup] = useState(true);
 
   // Define status and finimg in the component's state
@@ -42,7 +43,7 @@ const App = () => {
 
     if (currentMessage.trim()) {
       messages.push(currentMessage.trim());
-    }
+    } 
 
     return messages;
   }
@@ -56,112 +57,146 @@ const App = () => {
       direction: "outgoing",
     };
 
-    if (firstClick) {
-      setUserId(message);
-      setFirstClick(false);
+    // new array of messages
+    const newMessages = [...messages, newMessage];
 
-    } else {
-      // new array of messages
-      const newMessages = [...messages, newMessage];
+    // Update our messages state
+    setMessages(newMessages);
 
-      // Update our messages state
-      setMessages(newMessages);
+    // Set a typing indicator (Ryno is typing...)
+    setTyping(true);
 
-      // Set a typing indicator (Ryno is typing...)
-      setTyping(true);
+    try {
+      // Send the message to the API
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, password: password, message: message }),
+      };
 
-      try {
-        // Send the message to the API
-        const requestOptions = {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId, message: message }),
+      const apiResponse = await fetch(
+        "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
+        requestOptions
+      );
+
+      if (!apiResponse.ok) {
+        console.log(apiResponse.statusText);
+        throw new Error(`HTTP error! status: ${apiResponse.status}`);
+      }
+
+      const data = await apiResponse.json();
+
+      if (data && data.response) {
+        // If single response, convert it to an array containing single element
+        let responses = Array.isArray(data.response) ? data.response : [data.response];
+
+        // Apply split sentences on each response
+        responses = responses.flatMap(response => splitSentences(response));
+
+        const sendSeparatedMessages = async () => {
+          for (const message of responses) {
+            setTyping(true);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            // Call image api only when status is set to 1
+            if (status === 1) {
+              try {
+                const res = await axios.get(
+                  "https://2dde-115-208-95-142.jp.ngrok.io/picture/in?message=" + findimg
+                );
+
+                // If we obtained data, add image messsage and set status to 0
+                if (res.data && status === 1) {
+                  console.log("return value judgment：", res);
+                  const newMessageWithChatGPT1 = {
+                    message:
+                      "<img width='250'  height='250' src='https://2dde-115-208-95-142.jp.ngrok.io/picture/getjpg1?message=" +
+                      findimg +
+                      "'/>",
+                    sender: "ChatGPT",
+                    direction: "ingoing",
+                  };
+                  setMessages((prevMessages) => [
+                    ...prevMessages,
+                    newMessageWithChatGPT1,
+                  ]);
+                  setStatus(0);
+                }
+              } catch (err) {
+                console.log(err);
+              }
+            }
+
+            const newMessageWithChatGPT = {
+              message: message,
+              sender: "ChatGPT",
+              direction: "ingoing",
+            };
+
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              newMessageWithChatGPT,
+            ]);
+            setTyping(false);
+          }
         };
 
-        const apiResponse = await fetch(
-          "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
-          requestOptions
-        );
-
-        if (!apiResponse.ok) {
-          console.log(apiResponse.statusText);
-          throw new Error(`HTTP error! status: ${apiResponse.status}`);
-        }
-
-        const data = await apiResponse.json();
-
-        if (data && data.response) {
-          // If single response, convert it to an array containing single element
-          let responses = Array.isArray(data.response) ? data.response : [data.response];
-
-          // Apply split sentences on each response
-          responses = responses.flatMap(response => splitSentences(response));
-
-          const sendSeparatedMessages = async () => {
-            for (const message of responses) {
-              setTyping(true);
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-
-              // Call image api only when status is set to 1
-              if (status === 1) {
-                try {
-                  const res = await axios.get(
-                    "https://2dde-115-208-95-142.jp.ngrok.io/picture/in?message=" + findimg
-                  );
-
-                  // If we obtained data, add image messsage and set status to 0
-                  if (res.data && status === 1) {
-                    console.log("return value judgment：", res);
-                    const newMessageWithChatGPT1 = {
-                      message:
-                        "<img width='250'  height='250' src='https://2dde-115-208-95-142.jp.ngrok.io/picture/getjpg1?message=" +
-                        findimg +
-                        "'/>",
-                      sender: "ChatGPT",
-                      direction: "ingoing",
-                    };
-                    setMessages((prevMessages) => [
-                      ...prevMessages,
-                      newMessageWithChatGPT1,
-                    ]);
-                    setStatus(0);
-                  }
-                } catch (err) {
-                  console.log(err);
-                }
-              }
-
-              const newMessageWithChatGPT = {
-                message: message,
-                sender: "ChatGPT",
-                direction: "ingoing",
-              };
-
-              setMessages((prevMessages) => [
-                ...prevMessages,
-                newMessageWithChatGPT,
-              ]);
-              setTyping(false);
-            }
-          };
-
-          await sendSeparatedMessages();
-          setTyping(false);
-        }
-      } catch (err) {
-        console.error("Error:", err);
+        await sendSeparatedMessages();
+        setTyping(false);
       }
+    } catch (err) {
+      console.error("Error:", err);
     }
-  };
+  }
 
-  const [isShowPopupDisplayed, setIsShowPopupDisplayed] = useState(false);
-  const closePopup = (value) => {
-    setFindimg(value);
-    setStatus(1);
-    handleSend(value);
+  // const closePopup = (value) => {
+  //   setFindimg(value);
+  //   setStatus(1);
+  //   handleSend(value);
 
+  //   setIsShowPopup(false);
+  //   setIsShowPopupDisplayed(true);
+  //   document.querySelector("#input").focus();
+  // };
+  const closePopup = async (userId, passwordFromUserInput) => {
+
+    // store user_id 
+    setUserId(userId)
+
+    // Call registration API
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({user_id: userId})
+    }
+
+    try {
+      const response = await fetch("https://ryno-v2-cedo4cgxka-de.a.run.app/register", requestOptions);
+      const data = await response.json();
+  
+      if (!response.ok) {
+        console.log(response.statusText);
+        throw new Error(data.message);
+      }
+
+      if (data.message.startsWith('Your user account has been created.')) {
+        // new user, password generated on server and returned in response
+        setPassword(data.message.split(":")[2].trim()); // parsing password from "Your user account has been created. Your password is: {password}."
+      } else {
+        // returning user, use the password from user input
+        setPassword(passwordFromUserInput);
+      }
+
+    } catch (err) {
+      console.error("Registration failed: ", err);
+      // re-display the popup if registration/login fails
+      setIsShowPopupDisplayed(false);
+      return; // if registration/login fails, stop executing function
+    }
+
+    // close the popup
     setIsShowPopup(false);
-    setIsShowPopupDisplayed(true);
+    setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
     document.querySelector("#input").focus();
   };
 

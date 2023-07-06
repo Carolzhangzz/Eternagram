@@ -32,7 +32,7 @@ def send_receive_messages(url, password):
         }
         print(f"Sending data: {data}")
         response = requests.post(url, json=data)
-        print(f"Status code: {response.status_code}")
+        print(f"Status 4ode: {response.status_code}")
 
         try:
             response_json = response.json()
