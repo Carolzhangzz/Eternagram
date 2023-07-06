@@ -14,6 +14,10 @@ import datetime
 import pdfplumber
 from io import BytesIO
 
+# For password 
+from random import randint
+from werkzeug.security import generate_password_hash, check_password_hash
+
 # LangChain library
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Pinecone
@@ -33,6 +37,25 @@ class CloudStorage:
     def file_exists(self, filepath):
         blob = self.bucket.blob(filepath)
         return blob.exists()
+    
+    # Check if the user exists
+    def check_user_exits(self, user_id):
+        filepath = 'users/%s/password' % user_id
+        return self.file_exists(filepath)
+    
+    # Retrieve hashed password for a user
+    def retrieve_hashed_password(self, user_id):
+        filepath = 'users/%s/password' % user_id
+        if self.file_exists(filepath):
+            hashed_password = self.open_file(filepath) 
+            return hashed_password
+        else:
+            return None
+        
+    # Save a user's id and hashed password
+    def save_user(self, user_id, hashed_password):
+        filepath = 'users/%s/password' % user_id
+        self.save_file(filepath, hashed_password)
     
     # Load JSON file to Google Cloud Storage
     def load_json(self, filepath):
@@ -109,7 +132,6 @@ class CloudStorage:
             print(f"No files found for user: {user_id}")
             return None, None
 
-
 # Class to use embeddings and completions
 class OpenAI:
     def __init__(self, api_key):
@@ -170,6 +192,28 @@ class Page:
         self.page_content = page_content
         self.metadata = metadata if metadata is not None else {}
 
+# Class for password managing
+class PasswordManager:
+    def __init__(self, storage):
+        self.storage = storage
+
+    # FUNCTION: generate a password
+    def generate_password(self):
+        return str(randint(10, 99)) # Two-digit random password
+    
+    # FUNCTION: generate password hash
+    def generate_password_hash(self, password):
+        return generate_password_hash(password)
+
+    # FUNCTION: check the password
+    def check_password(self, user_id, entered_password):
+        hashed_pwd = self.storage.retrieve_hashed_password(user_id)
+
+        # Check password
+        is_password_correct = check_password_hash(hashed_pwd, entered_password)
+
+        return is_password_correct
+
 # FUNCTION: load file from Google Cloud Storage
 def load_file_from_gcs(bucket_name, filepath):
     project_key = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
@@ -183,8 +227,9 @@ def load_file_from_gcs(bucket_name, filepath):
 env_file_content = load_file_from_gcs('ryno-v2', 'keys/.env')
 env_file = {line.split('=')[0]: line.split('=')[1] for line in env_file_content.split('\n') if line}
 
-# CloudStorage initialisation
+# Objects initialisation
 storage = CloudStorage('ryno-v2', os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
+password_manager = PasswordManager(storage)
 
 # Set up OpenAI API key and model
 openai.api_key = env_file['REACT_APP_OPENAI_API_KEY '].strip(" '")
@@ -218,29 +263,6 @@ docsearch = Pinecone.from_texts([t.page_content for t in texts], embeddings, ind
 # Convert timestamp to datetime
 def timestamp_to_datetime(unix_time):
     return datetime.datetime.fromtimestamp(unix_time).strftime("%A, %B %d, %Y at %I:%M%p %Z")
-
-# FUNCTION: trim cut-off responses
-def trim_response(response_text):
-    trimmed_response = response_text.strip()
-    last_period = trimmed_response.rfind(".")
-    last_question = trimmed_response.rfind("?")
-    last_exclamation = trimmed_response.rfind("!")
-    last_end = max(last_period, last_question, last_exclamation)
-
-    if last_end != -1:
-        return trimmed_response[: last_end + 1]
-    else:
-        return trimmed_response
-    
-# FUNCTION: get response length
-def get_response_length(user_input):
-    input_length = len(user_input)
-    if input_length <= 20:
-        return 50
-    elif input_length <= 100:
-        return 100
-    else:
-        return 150
     
 # FUNCTION: Load conversation fuction
 def load_conversation(results, user_id):

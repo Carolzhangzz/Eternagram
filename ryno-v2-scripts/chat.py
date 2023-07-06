@@ -1,8 +1,7 @@
 # import from utils.py
-from utils import (storage, openai_api, vdb, timestamp_to_datetime)
+from utils import (storage, password_manager, openai_api, vdb, timestamp_to_datetime)
 
 # import other essentials
-import openai
 from dotenv import load_dotenv
 import time
 from uuid import uuid4
@@ -19,11 +18,16 @@ load_dotenv()
 # MODELS
 GPT3_MODEL = 'gpt-3.5-turbo'
 GPT4_MODEL = 'gpt-4'
-
-
+    
 # FUNCTION: PROCESS MESSAGE
-def process_message(user_id, message):
+def process_message(user_id, entered_password, message):
     total_start_time = time.time()
+
+    # [Check user existence and password validation]
+    if not storage.check_user_exits(user_id):  
+        return "User does not exist. Please register first."
+    elif password_manager.check_password(user_id, entered_password) == False:
+        return "Invalid password. Please try again."
 
     # Get user input, save it, vectorize it, save to pinecone
     payload = list()
