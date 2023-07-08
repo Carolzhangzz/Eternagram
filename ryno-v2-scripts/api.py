@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chat import process_message
@@ -22,7 +22,8 @@ api.add_middleware(
 )
 
 class RegisterInput(BaseModel):
-    user_id : str   # Only needs user_id
+    user_id: str   # User needs to input username
+    password: str # User needs to input password
 
 class RegisterOutput(BaseModel):
     message: str    # This will output a message
@@ -38,17 +39,17 @@ class MessageOutput(BaseModel):
 @api.post("/register", response_model=RegisterOutput)
 def register_endpoint(register_input: RegisterInput) -> RegisterOutput:
     user_id = register_input.user_id
+    user_password = register_input.password
 
     if storage.check_user_exits(user_id):
-        return RegisterOutput(message="User already exists")
+        raise HTTPException(status_code=400, detail="User already exists")
     else:
-        password = password_manager.generate_password() # Generate a password
-        hashed_pwd = password_manager.generate_password_hash(password)
+        hashed_pwd = password_manager.generate_password_hash(user_password)
 
         # Save initial user data
         storage.save_user(user_id, hashed_pwd)
         
-        return RegisterOutput(message=f"Your user account has been created. Your password is: {password}.")
+        return RegisterOutput(message=f"Your user account has been created.")
 
 @api.post("/message", response_model=MessageOutput)
 def process_message_endpoint(message_input: MessageInput) -> MessageOutput:
@@ -59,11 +60,11 @@ def process_message_endpoint(message_input: MessageInput) -> MessageOutput:
     logger.info(f"Received message from user {user_id}: {user_message}")
 
     if not storage.check_user_exits(user_id):
-        return MessageOutput(response="User does not exist. Please register first.")
+        return HTTPException(status_code=400, response="User does not exist. Please register first.")
     else:
         logger.info(f"Checking password for user {user_id} with entered password: {user_password}")
         if not password_manager.check_password(user_id, user_password):
-            return MessageOutput(response="Invalid password. Please try again.")
+            raise HTTPException(status_code=400, detail="Invalid password. Please try again.")
 
     try:
         # Call the process_message function with the user_input and get the response

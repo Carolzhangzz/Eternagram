@@ -196,10 +196,6 @@ class Page:
 class PasswordManager:
     def __init__(self, storage):
         self.storage = storage
-
-    # FUNCTION: generate a password
-    def generate_password(self):
-        return str(randint(10, 99)) # Two-digit random password
     
     # FUNCTION: generate password hash
     def generate_password_hash(self, password):
