@@ -1,22 +1,20 @@
 import "./popup.css";
+import alertFn from "./../../tool/alert-tips";
 import { useState, useRef, useEffect } from "react";
 
 const Popup = ({ isShow, closeEvent }) => {
   const popupRef = useRef(0);
   const [username, setUsername] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
 
   const closePopup = () => {
-	//if (value.trim() === "") return;
-    if (username.trim() === "" || code.trim() === "") return;
-    const data = popupRef.current.animate([{ opacity: 1 }, { opacity: 0 }], {
-      duration: 300,
-      iterations: 1,
-      easing: "ease-out",
-    });
-    data.onfinish = (e) => {
-      closeEvent(username,code);
-    };
+    //if (value.trim() === "") return;
+    if (username.trim() === "" || password.trim() === "") {
+      alertFn({ title: "Please enter your account and password." });
+      return;
+    }
+    closeEvent(username, password, isLogin);
   };
   useEffect(() => {
     if (isShow) {
@@ -30,14 +28,20 @@ const Popup = ({ isShow, closeEvent }) => {
       function detectTabKey(e) {
         if (e.keyCode === 9) {
           const activeElem = document.activeElement;
-          if (activeElem.className=== "confirm") {
+          if (activeElem.className === "confirm") {
             return;
           }
-          document.querySelector(".confirm").focus();
+          // document.querySelector(".confirm").focus();
         }
       }
     }
   }, [isShow]);
+
+  const ChangeIsLogin = (value) => {
+    setIsLogin(value);
+    setPassword("");
+    setUsername("");
+  };
 
   return (
     <>
@@ -60,22 +64,45 @@ const Popup = ({ isShow, closeEvent }) => {
               placeholder="user name"
             />
             <input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => {
                 if (e.code === "Enter") closePopup();
               }}
-              placeholder="pin code"
+              placeholder="password"
             />
           </div>
           <div className="popup-footer">
-            {/* <button className='cancel'>Ok,i already know</button> */}
             <button className="confirm" onClick={closePopup}>
-              {/* Ok,i already know */}
-              Log in
+              {isLogin ? "Log in" : "Sign up"}
             </button>
           </div>
+        </div>
+        <div className="tips">
+          {isLogin ? (
+            <div>
+              Don't have an account?
+              <b
+                onClick={() => {
+                  ChangeIsLogin(false);
+                }}
+              >
+                Sign up
+              </b>
+            </div>
+          ) : (
+            <div>
+              Have an account?
+              <b
+                onClick={() => {
+                  ChangeIsLogin(true);
+                }}
+              >
+                Log in
+              </b>
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -83,4 +110,3 @@ const Popup = ({ isShow, closeEvent }) => {
 };
 
 export default Popup;
-
