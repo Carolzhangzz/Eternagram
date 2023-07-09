@@ -1,6 +1,7 @@
 import "./App.css";
 import React, { useState } from "react";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import alertFn from "./tool/alert-tips";
 import {
   MainContainer,
   ChatContainer,
@@ -43,7 +44,7 @@ const App = () => {
 
     if (currentMessage.trim()) {
       messages.push(currentMessage.trim());
-    } 
+    }
 
     return messages;
   }
@@ -66,12 +67,18 @@ const App = () => {
     // Set a typing indicator (Ryno is typing...)
     setTyping(true);
 
+    if (password == "") return;
+
     try {
       // Send the message to the API
       const requestOptions = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, password: password, message: message }),
+        body: JSON.stringify({
+          user_id: userId,
+          password: password,
+          message: message,
+        }),
       };
 
       const apiResponse = await fetch(
@@ -88,10 +95,12 @@ const App = () => {
 
       if (data && data.response) {
         // If single response, convert it to an array containing single element
-        let responses = Array.isArray(data.response) ? data.response : [data.response];
+        let responses = Array.isArray(data.response)
+          ? data.response
+          : [data.response];
 
         // Apply split sentences on each response
-        responses = responses.flatMap(response => splitSentences(response));
+        responses = responses.flatMap((response) => splitSentences(response));
 
         const sendSeparatedMessages = async () => {
           for (const message of responses) {
@@ -102,7 +111,8 @@ const App = () => {
             if (status === 1) {
               try {
                 const res = await axios.get(
-                  "https://2dde-115-208-95-142.jp.ngrok.io/picture/in?message=" + findimg
+                  "https://2dde-115-208-95-142.jp.ngrok.io/picture/in?message=" +
+                    findimg
                 );
 
                 // If we obtained data, add image messsage and set status to 0
@@ -147,57 +157,92 @@ const App = () => {
     } catch (err) {
       console.error("Error:", err);
     }
-  }
+  };
+  const closePopup = async (userId, passwordFromUserInput, isLogin) => {
+    // store user_id
+    setUserId(userId);
 
-  // const closePopup = (value) => {
-  //   setFindimg(value);
-  //   setStatus(1);
-  //   handleSend(value);
+    // Only login button execution
+    if (isLogin) {
+      alertFn({ title: "Loading..." });
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          password: passwordFromUserInput,
+          message: "",
+        }),
+      };
 
-  //   setIsShowPopup(false);
-  //   setIsShowPopupDisplayed(true);
-  //   document.querySelector("#input").focus();
-  // };
-  const closePopup = async (userId, passwordFromUserInput) => {
+      try {
+        const apiResponse = await fetch(
+          "https://ryno-v2-cedo4cgxka-de.a.run.app/message",
+          requestOptions
+        );
+        const data = await apiResponse.json();
 
-    // store user_id 
-    setUserId(userId)
+        // Login failed
+        if (!apiResponse.ok) {
+          alertFn({ title: data.detail, textColor: "#e56c5e" });
+          throw new Error(data.message);
+        }
 
+
+        alertFn({ title: "Login success!", textColor: "#359d5a" });
+        // close the popup
+        setPassword(passwordFromUserInput);
+        setIsShowPopup(false);
+        setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
+        document.querySelector("#input").focus();
+      } catch (error) {
+        if(error == "TypeError: Failed to fetch"){
+          alertFn({ title: "Account does not exist", textColor: "#e56c5e" });
+        }
+      }
+    } else {
+      registerFn(userId, passwordFromUserInput);
+    }
+  };
+
+  const registerFn = async (userId, passwordFromUserInput) => {
     // Call registration API
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({user_id: userId})
-    }
+      body: JSON.stringify({
+        user_id: userId,
+        password: passwordFromUserInput,
+      }),
+    };
 
     try {
-      const response = await fetch("https://ryno-v2-cedo4cgxka-de.a.run.app/register", requestOptions);
+      const response = await fetch(
+        "https://ryno-v2-cedo4cgxka-de.a.run.app/register",
+        requestOptions
+      );
       const data = await response.json();
-  
+
+      // Creation failed
       if (!response.ok) {
-        console.log(response.statusText);
+        alertFn({ title: data.detail, textColor: "#e56c5e" });
         throw new Error(data.message);
       }
 
-      if (data.message.startsWith('Your user account has been created.')) {
+      if (data.message.startsWith("Your user account has been created.")) {
+        alertFn({ title: data.message, textColor: "#359d5a" });
         // new user, password generated on server and returned in response
         setPassword(data.message.split(":")[2].trim()); // parsing password from "Your user account has been created. Your password is: {password}."
       } else {
         // returning user, use the password from user input
         setPassword(passwordFromUserInput);
       }
-
     } catch (err) {
       console.error("Registration failed: ", err);
       // re-display the popup if registration/login fails
       setIsShowPopupDisplayed(false);
       return; // if registration/login fails, stop executing function
     }
-
-    // close the popup
-    setIsShowPopup(false);
-    setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
-    document.querySelector("#input").focus();
   };
 
   return (
@@ -283,6 +328,8 @@ const App = () => {
         </form>
       </div>
       {/* <p>Response: {response}</p> */}
+
+      <div className="alert-tips-box"></div>
     </div>
   );
 };

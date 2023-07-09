@@ -17,3 +17,38 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.alert-tips {
+  text-align: left;
+  text-indent: 1em;
+  white-space: nowrap;
+  background-color: #fff;
+  box-sizing: border-box;
+  padding: 0 0;
+  min-width: 20em;
+  max-width: 20em;
+  width: 20em;
+  height:3em;
+  line-height: 3em;
+  overflow: hidden;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.04); */
+  box-shadow: 0 0px 12px 0 rgba(0,0,0,.1);
+  border-radius: 5px;
+  position: relative;
+  left: calc(50vw - 10em);
+  user-select: none;
+  pointer-events: all;
+  text-overflow: ellipsis;
+}
+.alert-tips-box {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  top: 1em;
+  left: 0;
+  transition: all 0.2s linear;
+  pointer-events: none;
+}
