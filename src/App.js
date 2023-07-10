@@ -234,15 +234,20 @@ const App = () => {
 
       if (data.message.startsWith("Your user account has been created.")) {
         alertFn({ title: data.message, textColor: "#359d5a" });
+        alertFn({ title: "Start chat with Ryno！", textColor: "#359d5a" });
         // new user, password generated on server and returned in response
-        setPassword(data.message.split(":")[2].trim()); // parsing password from "Your user account has been created. Your password is: {password}."
-      } else {
-        // returning user, use the password from user input
-        setPassword(passwordFromUserInput);
+        setPassword(passwordFromUserInput); // parsing password from "Your user account has been created. Your password is: {password}."
+
+        setIsShowPopup(false);
+        setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
       }
     } catch (err) {
       // console.error("Registration failed: ", err === "TypeError: Failed to fetch");
-      console.log(err, err.toString(), err.toString() === "TypeError: Failed to fetch");
+      console.log(
+        err,
+        err.toString(),
+        err.toString() === "TypeError: Failed to fetch"
+      );
 
       if (err.toString() === "TypeError: Failed to fetch") {
         alertFn({ title: "Error", textColor: "#e56c5e" });
