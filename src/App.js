@@ -67,7 +67,7 @@ const App = () => {
     // Set a typing indicator (Ryno is typing...)
     setTyping(true);
 
-    if (password == "") return;
+    if (password === "") return;
 
     try {
       // Send the message to the API
@@ -164,7 +164,7 @@ const App = () => {
 
     // Only login button execution
     if (isLogin) {
-      alertFn({ title: "Loading..." });
+      const closeFn = alertFn({ title: "Loading...", customControl: true });
       const requestOptions = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -184,10 +184,12 @@ const App = () => {
 
         // Login failed
         if (!apiResponse.ok) {
+          closeFn();
           alertFn({ title: data.detail, textColor: "#e56c5e" });
           throw new Error(data.message);
         }
 
+        closeFn();
         alertFn({ title: "Login success!", textColor: "#359d5a" });
         // close the popup
         setPassword(passwordFromUserInput);
@@ -195,9 +197,11 @@ const App = () => {
         setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
         document.querySelector("#input").focus();
       } catch (error) {
-        if(error == "TypeError: Failed to fetch"){
+        if (error === "TypeError: Failed to fetch") {
+          closeFn();
           alertFn({ title: "Account does not exist", textColor: "#e56c5e" });
         }
+        closeFn();
       }
     } else {
       registerFn(userId, passwordFromUserInput);
@@ -231,15 +235,25 @@ const App = () => {
 
       if (data.message.startsWith("Your user account has been created.")) {
         alertFn({ title: data.message, textColor: "#359d5a" });
+        alertFn({ title: "Start chat with Ryno！", textColor: "#359d5a" });
         // new user, password generated on server and returned in response
-        setPassword(data.message.split(":")[2].trim()); // parsing password from "Your user account has been created. Your password is: {password}."
-      } else {
-        // returning user, use the password from user input
-        setPassword(passwordFromUserInput);
+        setPassword(passwordFromUserInput); // parsing password from "Your user account has been created. Your password is: {password}."
+
+        setIsShowPopup(false);
+        setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
       }
 
     } catch (err) {
-      console.error("Registration failed: ", err);
+      // console.error("Registration failed: ", err === "TypeError: Failed to fetch");
+      console.log(
+        err,
+        err.toString(),
+        err.toString() === "TypeError: Failed to fetch"
+      );
+
+      if (err.toString() === "TypeError: Failed to fetch") {
+        alertFn({ title: "Error", textColor: "#e56c5e" });
+      }
       // re-display the popup if registration/login fails
       setIsShowPopupDisplayed(false);
       return; // if registration/login fails, stop executing function
@@ -336,3 +350,4 @@ const App = () => {
 };
 
 export default App;
+
