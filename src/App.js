@@ -105,7 +105,7 @@ const App = () => {
         const sendSeparatedMessages = async () => {
           for (const message of responses) {
             setTyping(true);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 2000));
 
             // Call image api only when status is set to 1
             if (status === 1) {
@@ -188,7 +188,6 @@ const App = () => {
           throw new Error(data.message);
         }
 
-
         alertFn({ title: "Login success!", textColor: "#359d5a" });
         // close the popup
         setPassword(passwordFromUserInput);
@@ -206,6 +205,7 @@ const App = () => {
   };
 
   const registerFn = async (userId, passwordFromUserInput) => {
+
     // Call registration API
     const requestOptions = {
       method: "POST",
@@ -237,6 +237,7 @@ const App = () => {
         // returning user, use the password from user input
         setPassword(passwordFromUserInput);
       }
+
     } catch (err) {
       console.error("Registration failed: ", err);
       // re-display the popup if registration/login fails

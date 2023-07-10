@@ -9,8 +9,8 @@ import json
 
 # import scenes
 from scenes.prologue import prologue
-from scenes.scene1 import scene1
-from scenes.scene2 import scene2
+from scenes.scene1 import scene1, scene1_trigger,scene1_animation
+from scenes.scene2 import scene2, scene2_trigger, scene2_animation
 from scenes.scene3 import scene3
 
 load_dotenv()
@@ -55,8 +55,18 @@ def process_message(user_id, entered_password, message):
         scene, res, next_step = prologue(message, step)
     elif scene == 'scene1':
         scene, res, next_step = scene1(message, user_id, vector, step)
+        # Check for trigger word
+        trigger_result = scene1_trigger(message)
+        if trigger_result == "True":
+            res = scene1_animation()
+            scene = 'scene2'
     elif scene == 'scene2':
         scene, res, next_step = scene2(message, user_id, vector, step)
+        # Check if the trigger word is found
+        trigger_result = scene2_trigger(message)
+        if trigger_result == "True":
+            res = scene2_animation()
+            scene = 'scene3'
     elif scene == 'scene3':
         res = scene3(message, user_id, vector)
     else:
@@ -75,14 +85,14 @@ def process_message(user_id, entered_password, message):
 
     # Check if the response is a list or not
     if isinstance(res, list):
-        res_vector = " ".join(res)
+        res_vector = "\n".join(res)
     else:
         res_vector = res
 
     # Save Ryno's response, vectorize, save, etc
     timestamp = time.time()
     timestring = timestamp_to_datetime(timestamp)
-    message = res
+    message = res_vector
     vector_start_time = time.time()
     vector = openai_api.gpt3_embeddings(res_vector)
     print(f"Vector generation for response took {time.time() - vector_start_time} seconds")

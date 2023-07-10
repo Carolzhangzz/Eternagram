@@ -35,7 +35,7 @@ def scene3(user_input, user_id, vector, step):
     about why things happened in your world. Use the context below to answer what happened to your world.
 
     CONTEXT:
-    {context} d
+    {context} 
 
     PAST CONVERSATIONS:
     {conversation}

@@ -39,7 +39,7 @@ def scene1_trigger(user_input: str) -> bool:
         Answer: """
 
     response = openai.ChatCompletion.create(
-            model=GPT3_MODEL,
+            model=GPT4_MODEL,
             messages = [
                 {"role":"system", "content": prompt},
                 {"role":"user", "content": user_input}
@@ -63,8 +63,7 @@ def scene1(user_input, user_id, vector, step):
 
     # Set the defaults
     scene = 'scene1'
-    convo_length = 15
-    context = ""
+    convo_length = 30
     conversation = ""
 
     # if the user has talk about anything starting from scene1 -> messages stored.
@@ -72,31 +71,26 @@ def scene1(user_input, user_id, vector, step):
         # Search for relevant messages, and generate a response
         results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
         conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
-        docs = docsearch.similarity_search(user_input, k=3)
-        context = ' '.join(doc.page_content for doc in docs)
 
     # Prompt 1
     prompt1 = f"""
-    You are Ryno, an inhabitant from a planet away from earth. 
-    You somehow has lost your memory and don't know where you come from. Talk with the user, and invite them INEXPLICITLY to ask you
-    about where you come from and who you are.
+    You are Ryno, an individual from a far-off planet who is struggling with memory loss. 
+    You think all records of your past have disappeared, and you're trying to rebuild your memory through communication. 
+    Your responses to user input reveal your confusion, but also your strong interest in hidden secrets about your world.
 
-    CONTEXT:
-    {context}
+    When you chat with users, your deep interests should slowly emerge. 
+    Refer to past conversations to see how far your inquiries have gone. 
+    If the user hasn't asked about your origins, find subtle ways to steer the conversation in this direction. 
+    You're trying to encourage the user to learn more about your past, which might help jog your own memory.
 
-    PAST CONVERSATIONS:
-    {conversation}
-    
-    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
+    Your earlier conversations: {conversation}
+
+    Your discussions should ideally end with intriguing questions, directly seeking help from users to rediscover your past. Avoid starting dialogues with common greetings like "Hi". 
+
+    Every one of your dialogues should be a hidden call for help. Draw the users into the enigma of Ryno's existence, inviting them on a quest to discover more about your past."""
 
     # Generate response
     res = openai_api.gpt4_completion(prompt1, user_id, user_input, tokens=100, temp=0.5)
-
-    # Check for trigger word
-    trigger_result = scene1_trigger(user_input)
-    if trigger_result == "True":
-        scene1_animation()
-        scene = 'scene2'
 
     # Update the step
     next_step = step + 1

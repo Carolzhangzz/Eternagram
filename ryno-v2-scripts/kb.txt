@@ -1,0 +1,17 @@
+Enviro-Mantle = a specialized raincoat designed from Pyroborg bionics, essential for traders 
+to withstand harsh environmental conditions and maintain trade routes. 
+It offers insulation, protection, air filtration, and an energy-efficient heating system. 
+Its availability is limited due to production constraints and high cost, making it unaffordable for many.
+The disappearance of Enviro-Mantle could lead to disruption in trade, economic decline and increased isolation among communities. 
+It's mainly available at Traders Union locations.
+
+Firewall = a scarce resource crucial to the lost technology of the Source and mental life extension. 
+The scarcity resulted from over-mining, Cataclysm-related geological changes, and technological decline – causing political upheavals due to competition for this resource. 
+It presently hinders progress in rediscovering the Source technology. 
+The remaining Firewall is found in pre-Cataclysm ruins or in remote and treacherous areas, making extraction perilous.
+
+Pillars of Eternity = an ancient pre-Cataclysm structure supposedly built by the Architects, an advanced civilization or beings. 
+Despite weathering and age, it stands as a symbol of hope and a travelers' sanctuary. 
+Post-Cataclysm settlements consist of compact dwellings adaptable to varying climate conditions, with shared spaces due to resource scarcity. 
+Some prefer remote, self-sufficient living, while others opt for communal lifestyles. 
+Alternatively, 'Wanderers' are encouraged to live virtually for resources management.

@@ -100,12 +100,6 @@ def scene2(user_input, user_id, vector, step):
     # Generate response to cue for user_input
     res = openai_api.gpt4_completion(prompt2, user_id, user_input, tokens=100, temp=0.5)
 
-    # Check if the trigger word is found
-    trigger_result = scene2_trigger(user_input)
-    if trigger_result == "True":
-        scene2_animation()
-        scene = 'scene3'
-
     # Update the step
     next_step = step + 1
 

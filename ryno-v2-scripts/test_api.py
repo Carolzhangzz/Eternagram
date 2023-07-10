@@ -1,23 +1,8 @@
 import requests
 import time
 
-user_id = "tester555"  # Replace with your user_id
-password = "41"
-
-# def register_user(url, password=None):
-#     data = {"user_id": user_id}
-#     response= requests.post(url, json=data)
-#     if response.status_code == 200 and 'message' in response.json():
-#         feedback = response.json()['message']
-#         print(feedback)
-#         if "Your user account has been created. Your password is: " in feedback:
-#             password = feedback.split(':')[-1].strip().strip(".")
-#         elif "User already exists" in feedback:  # No error, continue with provided password
-#             # We might want to verify couple of things here, like 
-#             # is password is provided etc. That is not covered for brevity.
-#             pass
-#         print(f"The password inputted is {password}")
-#     return password
+user_id = "tomber305"  # Replace with your user_id
+password = "17"
   
 def send_receive_messages(url, password):
 
@@ -60,4 +45,5 @@ def send_receive_messages(url, password):
             print(f"Error decoding JSON: {e}")
 
 if __name__ == "__main__":
-    send_receive_messages("https://ryno-v2-cedo4cgxka-de.a.run.app/message", password)
+    # send_receive_messages("https://ryno-v2-cedo4cgxka-de.a.run.app/message", password)
+    send_receive_messages("http://localhost:8000/message", password)
