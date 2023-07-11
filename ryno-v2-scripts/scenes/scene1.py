@@ -1,5 +1,5 @@
 # import from utils.py
-from utils import (openai_api, vdb, docsearch, 
+from utils import (openai_api, vdb, 
                    load_conversation)
 
 # import other essentials
@@ -53,8 +53,7 @@ def scene1_trigger(user_input: str) -> bool:
 def scene1_animation():
     res = [
         "Ah! I do recall that, albeit vaguely.",
-        """It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm.
-            Please, help jog my memory by asking more questions relayed to this topic"""
+        """It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm. Please, help jog my memory by asking more questions related to this topic"""
     ]
     return res
 
@@ -93,6 +92,9 @@ def scene1(user_input, user_id, vector, step):
     res = openai_api.gpt4_completion(prompt1, user_id, user_input, tokens=100, temp=0.5)
 
     # Update the step
-    next_step = step + 1
+    if step > 4:
+        next_step = 5
+    else:
+        next_step = step + 1
 
     return scene, res, next_step

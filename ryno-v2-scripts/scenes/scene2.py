@@ -101,6 +101,9 @@ def scene2(user_input, user_id, vector, step):
     res = openai_api.gpt4_completion(prompt2, user_id, user_input, tokens=100, temp=0.5)
 
     # Update the step
-    next_step = step + 1
+    if step > 4:
+        next_step = 5
+    else:
+        next_step = step + 1
 
     return scene, res, next_step
