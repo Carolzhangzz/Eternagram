@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chat import process_message
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict
 import logging
 
 # import utils
@@ -33,8 +33,13 @@ class MessageInput(BaseModel):
     password: Optional[str]=None
     message: str
 
+# Add new type of output -> QuestionItem
+class QuestionItem(BaseModel):
+    question: str
+    responses: Optional[List[str]]
+
 class MessageOutput(BaseModel):
-    response: Union[str, List[str]]
+    response: Union[str, List[str], QuestionItem]
 
 @api.post("/register", response_model=RegisterOutput)
 def register_endpoint(register_input: RegisterInput) -> RegisterOutput:

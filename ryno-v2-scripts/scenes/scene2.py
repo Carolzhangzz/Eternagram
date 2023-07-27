@@ -57,13 +57,23 @@ def scene2_trigger(user_input: str) -> bool:
 def scene2_animation():
     """Scene 2 Animation"""
     res = [
-        "Emmmmm....",
-        "I sense something, something profound. I'm trying to recall why the catastrophe happened.",
-        "I might need more permission to access this part of my memory. I believe you are on the right track.",
-        "Understanding why the catastrophe happened is critical to my memory recovery. Perhaps, it can even help me answer who I am.",
-        "Please, help jog my memory by asking more questions related to this topic."
+        "Oh, I remember that...",
+        "Ah, the reason behind this catastrophe... It all comes flooding back to me.",
+        "The cataclysmic event, the mountains erupting, the extreme climate shifts. The aftermath left the surface and ground inhospitable, causing source scarcity and environmental degradation.",
+        "And actually, there's more.. the older generation, including myself, unknowingly overused the mental life extension technology, depleting resources without understanding the consequences. The knowledge was lost, leaving future generations unprepared.",
+        "And... The scarcity of materials like the Firewall worsened the environmental conditions. The economic structure shifted due to competition for limited resources. It's a harsh reality, a reminder of the importance of sustainability.",
+        "But now that this part of my memory is back, I feel..",
+        "I feel a mix of sadness and determination to rebuild our world in a better way."
     ]
 
+    return res
+
+def scene2_animation2():
+    """Scene 2 Animation Part:2"""
+    res = [
+        "Hey stranger, just wanted to take a moment to thank you for helping me recollect this super important memory. But here's the thing: I still can't remember who I am or what I'm all about...",
+        "On the flip side, something interesting is happening. As these memories come flooding back, I'm also rediscovering my curiosity – something I hadn't felt in ages."
+    ]
     return res
 
 def scene2(user_input, user_id, vector, step):

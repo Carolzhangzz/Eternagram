@@ -9,9 +9,10 @@ import json
 
 # import scenes
 from scenes.prologue import prologue
-from scenes.scene1 import scene1, scene1_trigger,scene1_animation
-from scenes.scene2 import scene2, scene2_trigger, scene2_animation
+from scenes.scene1 import scene1, scene1_trigger, scene1_animation
+from scenes.scene2 import scene2, scene2_trigger, scene2_animation, scene2_animation2
 from scenes.scene3 import scene3
+from scenes.beliefs import run_scene2_questions
 
 load_dotenv()
 
@@ -66,7 +67,25 @@ def process_message(user_id, entered_password, message):
         trigger_result = scene2_trigger(message)
         if trigger_result == "True":
             res = scene2_animation()
+            scene = 'scene2_animation'
+    elif scene == 'scene2_animation':
+        # Obtain qualitative data of the user.
+        qual_data = message
+
+        res = scene2_animation2()
+        scene = 'scene2_questions'
+    elif scene == 'scene2_questions':
+        # Take the response as dictionary
+        scene, response_obj, next_step = run_scene2_questions(step)
+
+        # Obtain both question and possible choices
+        question = response_obj["question"]
+        choices = response_obj["responses"]
+
+        # Return question and choices to the frontend
+        if next_step >= 13:
             scene = 'scene3'
+        res = {"question": question, "choices": choices}
     elif scene == 'scene3':
         res = scene3(message, user_id, vector)
     else:
@@ -86,6 +105,8 @@ def process_message(user_id, entered_password, message):
     # [Check if the response is a list or not]
     if isinstance(res, list):
         res_vector = "\n".join(res)
+    elif isinstance(res, dict):
+        res_vector = res[question]
     else:
         res_vector = res
 

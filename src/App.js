@@ -12,6 +12,7 @@ import {
 
 import CustomPopup from "./components/customPopup/popup";
 import axios from "axios";
+import { response } from "express";
 
 const App = () => {
   const [userId, setUserId] = useState("");
@@ -93,7 +94,19 @@ const App = () => {
 
       const data = await apiResponse.json();
 
-      if (data && data.response) {
+      // Add an additional check
+      if (data && data.response.hasOwnProperty('responses')) {
+          // If responses are received from the server, treat it as a multi-selection question
+          const newMessage = {
+            sender: "Ryno",
+            direction: "incoming",
+            message: data.response.question,
+            choices: data.response.responses
+          };
+          setMessages([...messages, newMessage]);
+          setTyping(false);
+      } 
+      else if (data && data.response) {
         // If single response, convert it to an array containing single element
         let responses = Array.isArray(data.response)
           ? data.response
@@ -283,7 +296,26 @@ const App = () => {
                 typing ? <TypingIndicator content="Ryno is typing..." /> : null
               }
             >
-              {messages.map((message, i) => {
+              {messages.map((message, messageIndex) => {
+                // Check if message has choices or not
+                if (message.choices) {
+                  // Render question as normal chat bubble and choices as buttons
+                  return (
+                    <React.Fragment key={messageIndex}>
+                      <Message model={message} />
+                      <div>
+                        {message.choices.map((choice, choiceIndex) => (
+                          <button
+                            key={`${messageIndex}-${choiceIndex}`}
+                            onClick={() => handleSend(choice)}
+                          >
+                            {choice}
+                          </button>
+                        ))}
+                      </div>
+                    </React.Fragment>
+                  );
+                }
                 return <Message key={i} model={message} />;
               })}
             </MessageList>
