@@ -78,18 +78,3 @@ def run_scene2_questions(step):
 
     return 'scene2_questions', res, next_step 
 
-# SCENE 3: BELIEF QUESTION ITEMS
-def run_scene3_questions():
-    """Give Belief Question Items"""
-
-    questions = [
-        """Now that you've learned about our world, It's hard to ignore how different our world has become, isn't it?""",
-        """For us, the natives... it's quite a transition. I'm wondering, how does this new  reality make you feel?""",
-        """These concerns are shared by many, and it's interesting to observe signs around us that validate these changes, don't you think?""",
-        """As time goes on, the transformation becomes increasingly apparent. Looking ahead, the question arises: do you believe my surroundings will continue to undergo such rapid changes in the next decade?""",
-        """Predicting the future is challenging, but contemplating the possibilities is thought-provoking. Amidst all this uncertainty, how do you feel about the world we're leaving for the younger generations?""",
-        """It's indeed a weighty thought to consider. Despite the devastating environmental circumstances, do you believe that individuals living in my world can make a positive impact?""",
-        """Having faith in the power of individuals is crucial. With that in mind, do you think our actions and lifestyle choices have contributed to shaping the new world we find ourselves in?""",
-        """It seems evident that our actions carry consequences. Furthermore, have you considered these changes impacting our day-to-day lives negatively?""",
-        """On a more encouraging note, do you still maintain the belief that if you, personally, living in our world, can make a difference and contribute to improving the world for future generations?"""
-    ]

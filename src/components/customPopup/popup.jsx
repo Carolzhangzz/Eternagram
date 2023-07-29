@@ -1,3 +1,4 @@
+import React from 'react';
 import "./popup.css";
 import alertFn from "./../../tool/alert-tips";
 import { useState, useRef, useEffect } from "react";

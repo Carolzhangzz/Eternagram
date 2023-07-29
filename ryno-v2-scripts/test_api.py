@@ -1,8 +1,8 @@
 import requests
 import time
 
-user_id = "tomber305"  # Replace with your user_id
-password = "17"
+user_id = "totoro"  # Replace with your user_id
+password = "123"
   
 def send_receive_messages(url, password):
 

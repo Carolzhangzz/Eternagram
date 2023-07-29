@@ -23,7 +23,7 @@ def scene2_trigger(user_input: str) -> bool:
         Question: Can you recall the origins of this environmentally devastating situation?
         Answer: True
             
-        Question: Where do you think am I?s
+        Question: Where do you think am I?
         Answer: False
             
         Question: Could you jog your memory about the place you come from?
@@ -35,8 +35,11 @@ def scene2_trigger(user_input: str) -> bool:
         Question: Do you have any memory of what triggered this environmentally devastating event?
         Answer: True
 
-        Question: Could you remind me of the reasons behind this environmental devastation?
-        Answer: 
+        Question: But, why does it happened?
+        Answer: True
+
+        Question: What happened?
+        Answer: False
             
         Now answer the question below and tell whether it is true or false.
         Question: {user_input}

@@ -12,7 +12,6 @@ import {
 
 import CustomPopup from "./components/customPopup/popup";
 import axios from "axios";
-import { response } from "express";
 
 const App = () => {
   const [userId, setUserId] = useState("");
@@ -316,7 +315,7 @@ const App = () => {
                     </React.Fragment>
                   );
                 }
-                return <Message key={i} model={message} />;
+                return <Message key={messageIndex} model={message} />;
               })}
             </MessageList>
 

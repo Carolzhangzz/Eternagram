@@ -69,11 +69,9 @@ def process_message(user_id, entered_password, message):
             res = scene2_animation()
             scene = 'scene2_animation'
     elif scene == 'scene2_animation':
-        # Obtain qualitative data of the user.
-        qual_data = message
-
         res = scene2_animation2()
         scene = 'scene2_questions'
+        next_step = 5
     elif scene == 'scene2_questions':
         # Take the response as dictionary
         scene, response_obj, next_step = run_scene2_questions(step)
@@ -102,13 +100,16 @@ def process_message(user_id, entered_password, message):
     storage.save_json('path/to/nexus/%s/%s.json' % (user_id, unique_id), metadata)
     payload.append((unique_id, vector, metadata))
 
-    # [Check if the response is a list or not]
+    # [Check if the response is a list or dictionary or not]
     if isinstance(res, list):
         res_vector = "\n".join(res)
     elif isinstance(res, dict):
-        res_vector = res[question]
+        res_vector = res.get("question")
+        if res_vector is None:
+            print("Key 'question' not found in dictionary 'res'")
+            res_vector = "None"  # You'll need to set a suitable default value
     else:
-        res_vector = res
+        res_vector = message
 
     # [Save Ryno's response, vectorize, save, etc]
     timestamp = time.time()
