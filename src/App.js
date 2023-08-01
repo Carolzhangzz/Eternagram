@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import alertFn from "./tool/alert-tips";
 import {
@@ -14,6 +14,21 @@ import CustomPopup from "./components/customPopup/popup";
 import axios from "axios";
 
 const App = () => {
+  const [questions, setQuestions] = useState({
+    question: [],
+    options: [],
+  });
+  const options = ["a", "b", "c", "d"];
+
+  useEffect(() => {
+    fetch("/question.json")
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res);
+        setQuestions(res);
+      });
+  }, []);
+
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -93,19 +108,24 @@ const App = () => {
 
       const data = await apiResponse.json();
 
+      console.log("test", questions);
       // Add an additional check
-      if (data && data.response.hasOwnProperty('responses')) {
-          // If responses are received from the server, treat it as a multi-selection question
-          const newMessage = {
-            sender: "Ryno",
-            direction: "incoming",
-            message: data.response.question,
-            choices: data.response.responses
-          };
-          setMessages([...messages, newMessage]);
-          setTyping(false);
-      } 
-      else if (data && data.response) {
+      if (data && data.response.hasOwnProperty("question")) {
+        // If responses are received from the server, treat it as a multi-selection question
+        const questionIndex = questions.question.indexOf(
+          data.response.question
+        );
+        console.log(questions.options[questionIndex]);
+
+        const newMessage = {
+          sender: "Ryno",
+          direction: "incoming",
+          message: data.response.question,
+          choices: questions.options[questionIndex],
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setTyping(false);
+      } else if (data && data.response) {
         // If single response, convert it to an array containing single element
         let responses = Array.isArray(data.response)
           ? data.response
@@ -126,6 +146,7 @@ const App = () => {
                   "https://2dde-115-208-95-142.jp.ngrok.io/picture/in?message=" +
                     findimg
                 );
+                // const res = {};
 
                 // If we obtained data, add image messsage and set status to 0
                 if (res.data && status === 1) {
@@ -221,7 +242,6 @@ const App = () => {
   };
 
   const registerFn = async (userId, passwordFromUserInput) => {
-
     // Call registration API
     const requestOptions = {
       method: "POST",
@@ -254,7 +274,6 @@ const App = () => {
         setIsShowPopup(false);
         setIsShowPopupDisplayed(true); // <-- once done with login/registration, set this to false
       }
-
     } catch (err) {
       // console.error("Registration failed: ", err === "TypeError: Failed to fetch");
       console.log(
@@ -303,14 +322,17 @@ const App = () => {
                     <React.Fragment key={messageIndex}>
                       <Message model={message} />
                       <div>
-                        {message.choices.map((choice, choiceIndex) => (
-                          <button
-                            key={`${messageIndex}-${choiceIndex}`}
-                            onClick={() => handleSend(choice)}
-                          >
-                            {choice}
-                          </button>
-                        ))}
+                        {message.choices.map((choice, choiceIndex) => {
+                          return (
+                            <div
+                              className="message-choice"
+                              key={`${messageIndex}-${choiceIndex}`}
+                              onClick={() => setMessage(choice)}
+                            >
+                              <p>{choice}</p>
+                            </div>
+                          );
+                        })}
                       </div>
                     </React.Fragment>
                   );
@@ -381,4 +403,5 @@ const App = () => {
 };
 
 export default App;
+
 
