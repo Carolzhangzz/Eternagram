@@ -5,23 +5,26 @@
   width: 100vw;
   --main--color: #4b8efe;
   --main--color2: #2752ff;
-  --main--color3: #EFEFEF;
+  --main--color3: #efefef;
 }
-.cs-message .cs-message__content ,
+.cs-message--incoming.cs-message .cs-message__content {
+  border-radius: 1.2em;
+}
+.cs-message .cs-message__content,
 .cs-message.cs-message--outgoing .cs-message__content {
   border-radius: 1.2em;
   background-color: var(--main--color);
   color: white;
 }
-.cs-message .cs-message__content{
+.cs-message .cs-message__content {
   border-radius: 1.2em;
   background-color: var(--main--color3);
   color: black;
 }
-.cs-message-list__typing-indicator-container .cs-typing-indicator__text{
+.cs-message-list__typing-indicator-container .cs-typing-indicator__text {
   color: var(--main--color2);
 }
-.cs-typing-indicator__indicator>div{
+.cs-typing-indicator__indicator > div {
   background-color: var(--main--color2);
 }
 .chatBox .cs-main-container {
@@ -125,7 +128,7 @@ input#button[type="submit"],
   height: 24px;
   line-height: 0;
 }
- 
+
 body {
   font-size: 16px;
   background-image: url(./bg.jpg);
@@ -146,7 +149,8 @@ body {
 }
 .cs-main-container,
 .cs-chat-container,
-.cs-message-list,.cs-typing-indicator {
+.cs-message-list,
+.cs-typing-indicator {
   background: transparent !important;
 }
 
@@ -169,15 +173,33 @@ body {
   }
   .cs-main-container,
   .cs-chat-container,
-  .cs-message-list,.cs-typing-indicator {
+  .cs-message-list,
+  .cs-typing-indicator {
     background: transparent !important;
   }
 }
-
 
 @media screen and (min-width: 1300px) {
   .chatBox {
     max-width: 1000px;
   }
+}
+
+.message-choice {
+}
+.message-choice span {
+  display: none;
+}
+.message-choice p:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+.message-choice p {
+  display: inline-block;
+  border: 1px solid var(--main--color);
+  border-radius: 50px;
+  padding: 6px 1em;
+  margin: 5px 0;
+  font-size: 0.91em;
 }
 
