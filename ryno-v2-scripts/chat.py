@@ -71,6 +71,7 @@ def process_message(user_id, entered_password, message):
     elif scene == 'scene2_animation':
         res = scene2_animation2()
         scene = 'scene2_questions'
+        # scene = 'scene3'
         next_step = 5
     elif scene == 'scene2_questions':
         # Take the response as dictionary
