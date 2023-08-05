@@ -1,6 +1,6 @@
 # import from utils.py
-from utils import (storage, openai_api, vdb, docsearch, 
-                   load_conversation, timestamp_to_datetime)
+from utils import (openai_api, vdb, docsearch, 
+                   load_conversation)
 
 # import other essentials
 import openai
@@ -46,7 +46,7 @@ def scene2_trigger(user_input: str) -> bool:
         Answer: """
 
     response = openai.ChatCompletion.create(
-            model=GPT3_MODEL,
+            model=GPT4_MODEL,
             messages = [
                 {"role":"system", "content": prompt},
                 {"role":"user", "content": user_input}
@@ -98,17 +98,14 @@ def scene2(user_input, user_id, vector, step):
 
     # Generate first response to cue users to talk
     prompt2 = f"""
-    You are Ryno, an inhabitant from a planet away from earth. You somehow has learned things that happened to your world, 
-    but you don't know why it happened. Talk with the user, and invite them INEXPLICITLY to ask you
-    about why things happened in your world. Use the context below to answer what happened to your world.
+    You're Ryno, from a distant planet. While you understand events of your world, you're uncertain why they occurred. Engage the user to subtly trigger curiosity about your world's past. Formulate your responses based on the given context and past conversations.
 
-    CONTEXT:
-    {context}
+    CONTEXT: {context}
 
-    PAST CONVERSATIONS:
-    {conversation}
-    
-    Your response MUST end with a question mark (?) or a period (.). You MUST NOT greet the user at first (e.g. "Hi")"""
+    PAST CONVERSATIONS: {conversation}
+
+    Conclude your response with either a question mark (?) or a period (.). Do not begin with common greetings like 'Hi'.
+    """
 
     # Generate response to cue for user_input
     res = openai_api.gpt4_completion(prompt2, user_id, user_input, tokens=100, temp=0.5)

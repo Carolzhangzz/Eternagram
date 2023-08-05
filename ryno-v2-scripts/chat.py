@@ -82,7 +82,7 @@ def process_message(user_id, entered_password, message):
         choices = response_obj["responses"]
 
         # Return question and choices to the frontend
-        if next_step >= 13:
+        if next_step >= 14:
             scene = 'scene3'
         res = {"question": question, "choices": choices}
     elif scene == 'scene3':
