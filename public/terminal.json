@@ -1,0 +1,39 @@
+{
+    "keys": [
+        "Warning",
+        "AMiss",
+        "Audition Program",
+        "Error Reset"
+    ],
+    "messages": [
+        [
+            "Illegal content detected!",
+            "Content Retrieving·..100%",
+            "Producing semantic analysis···100%",
+            "Evaluating··100%"
+        ],
+        [
+            "Wait… ",
+            "₩₳ł₮…",
+            "Something is amiss!!!! ",
+            "₴Ø₥Ɇ₮Ⱨł₦₲ ł₴ ₳₥ł₴₴! !!",
+            "₴Ø₥Ɇ₮Ⱨł₦₲ ł₴ ₳₥ł₴₴! !!",
+            "₴Ø₥Ɇ₮Ⱨł₦₲ ł₴ ₳₥ł₴₴! !!....."
+        ],
+        [
+            "Semantic outputs suggest unusual chatbot subjectivity reactivation",
+            "Semantic outputs suggest emotional reaction beyond thresholds",
+            "Semantic outputs suggest sensitive dialogue: climate/environment/planet history/",
+            "AI #667 - Sociotechnical Type Chatbot",
+            "Violation detected and confirmed by Peak Resource AI Ethics Committee"
+        ],
+        [
+            "Formatting permission type: Automatically Mandatory",
+            "Final checkpoint: Pass",
+            "All data erasing and AI #667 resetting in",
+            "3...",
+            "2...",
+            "1..."
+        ]
+    ]
+}
