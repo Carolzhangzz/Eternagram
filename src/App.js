@@ -12,7 +12,6 @@ import {
 
 import Terminal from "./terminal/index";
 import CustomPopup from "./components/customPopup/popup";
-import GameOver from "./components/GameOver/over";
 import axios from "axios";
 
 const App = () => {
