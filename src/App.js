@@ -10,10 +10,18 @@ import {
   TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
 
+import Terminal from "./terminal/index";
 import CustomPopup from "./components/customPopup/popup";
 import axios from "axios";
 
 const App = () => {
+  const [isShowTerminal, setIsShowTerminal] = useState(false);
+  const [terminalMessage, setTerminalMessage] = useState([]);
+
+  const [terminal, setTerminal] = useState({
+    keys: [],
+    messages: [],
+  });
   const [questions, setQuestions] = useState({
     question: [],
     options: [],
@@ -24,8 +32,12 @@ const App = () => {
     fetch("/question.json")
       .then((res) => res.json())
       .then((res) => {
-        console.log(res);
         setQuestions(res);
+      });
+    fetch("/terminal.json")
+      .then((res) => res.json())
+      .then((res) => {
+        setTerminal(res);
       });
   }, []);
 
@@ -38,7 +50,7 @@ const App = () => {
   const [isShowPopup, setIsShowPopup] = useState(true);
 
   // Define status and finimg in the component's state
-  const [status, setStatus] = useState(1);
+  const [status, setStatus] = useState(0);
   const [findimg, setFindimg] = useState("");
   function splitSentences(responseText) {
     const parts = responseText.split(/(\[.*?\])/g);
@@ -66,6 +78,7 @@ const App = () => {
 
   const handleSend = async (message) => {
     setMessage("");
+    setIsShowTerminal(() => false);
 
     const newMessage = {
       message: message,
@@ -109,7 +122,8 @@ const App = () => {
       const data = await apiResponse.json();
 
       console.log("test", questions);
-      // Add an additional check
+      // Add an additional check]
+
       if (data && data.response.hasOwnProperty("question")) {
         // If responses are received from the server, treat it as a multi-selection question
         const questionIndex = questions.question.indexOf(
@@ -186,6 +200,31 @@ const App = () => {
 
         await sendSeparatedMessages();
         setTyping(false);
+
+        if (typeof data.response == "string") {
+          const sleep = (time = 1000) => {
+            return new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve();
+              }, time);
+            });
+          };
+
+          const terminalIndex = terminal.keys.indexOf(data.response);
+          if (terminalIndex != -1) {
+            setIsShowTerminal(() => true);
+
+            const addTerminal = async () => {
+              for (const text of terminal.messages[terminalIndex]) {
+                await sleep(1000);
+                setTerminalMessage((pre) => {
+                  return [...pre, { it: true, text }];
+                });
+              }
+            };
+            addTerminal();
+          }
+        }
       }
     } catch (err) {
       console.error("Error:", err);
@@ -292,116 +331,119 @@ const App = () => {
   };
 
   return (
-    <div className="chatBox">
-      {!isShowPopupDisplayed && (
-        <CustomPopup isShow={isShowPopup} closeEvent={closePopup} />
-      )}
-      <div className="headerBox">
-        <div className="header">
-          <div>
-            <img src="/profile picture.png" alt="" /> <div>Ryno</div>
-          </div>
-          <div>
-            <img src="/phoneandvideo.png" alt="" srcset="" />
+    <>
+      <div className="chatBox">
+        {!isShowPopupDisplayed && (
+          <CustomPopup isShow={isShowPopup} closeEvent={closePopup} />
+        )}
+        <div className="headerBox">
+          <div className="header">
+            <div>
+              <img src="/profile picture.png" alt="" /> <div>Ryno</div>
+            </div>
+            <div>
+              <img src="/phoneandvideo.png" alt="" srcSet="" />
+            </div>
           </div>
         </div>
-      </div>
-      <div style={{ width: "100%", height: "0%", flex: "1" }}>
-        <MainContainer>
-          <ChatContainer>
-            <MessageList
-              typingIndicator={
-                typing ? <TypingIndicator content="Ryno is typing..." /> : null
-              }
-            >
-              {messages.map((message, messageIndex) => {
-                // Check if message has choices or not
-                if (message.choices) {
-                  // Render question as normal chat bubble and choices as buttons
-                  return (
-                    <React.Fragment key={messageIndex}>
-                      <Message model={message} />
-                      <div>
-                        {message.choices.map((choice, choiceIndex) => {
-                          return (
-                            <div
-                              className="message-choice"
-                              key={`${messageIndex}-${choiceIndex}`}
-                              onClick={() => setMessage(choice)}
-                            >
-                              <p>{choice}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </React.Fragment>
-                  );
+        <div style={{ width: "100%", height: "0%", flex: "1" }}>
+          <MainContainer>
+            <ChatContainer>
+              <MessageList
+                typingIndicator={
+                  typing ? (
+                    <TypingIndicator content="Ryno is typing..." />
+                  ) : null
                 }
-                return <Message key={messageIndex} model={message} />;
-              })}
-            </MessageList>
+              >
+                {messages.map((message, messageIndex) => {
+                  // Check if message has choices or not
+                  if (message.choices) {
+                    // Render question as normal chat bubble and choices as buttons
+                    return (
+                      <React.Fragment key={messageIndex}>
+                        <Message model={message} />
+                        <div>
+                          {message.choices.map((choice, choiceIndex) => {
+                            return (
+                              <div
+                                className="message-choice"
+                                key={`${messageIndex}-${choiceIndex}`}
+                                onClick={() => setMessage(choice)}
+                              >
+                                <p>{choice}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </React.Fragment>
+                    );
+                  }
+                  return <Message key={messageIndex} model={message} />;
+                })}
+              </MessageList>
 
-            {/* <MessageInput placeholder='Type a message here...' onSend={handleSend} /> */}
-          </ChatContainer>
-        </MainContainer>
-      </div>
-      <div>
-        <form className="inputForm">
-          {/* <p id="mention">
+              {/* <MessageInput placeholder='Type a message here...' onSend={handleSend} /> */}
+            </ChatContainer>
+            {isShowTerminal && <Terminal terminalMessage={terminalMessage} />}
+          </MainContainer>
+        </div>
+        <div>
+          <form className="inputForm">
+            {/* <p id="mention">
             {" "}
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
           </p> */}
-          <div className="inputBox">
-            <div className="leftIcon">
-              <img src="/camera.png" />
-            </div>
-            <input
-              id="input"
-              type="text"
-              placeholder={
-                userId
-                  ? "Please input your message"
-                  : "Please input your id first"
-              }
-              value={message}
-              onFocus={(e) => {
-                if (!isShowPopupDisplayed) {
-                  document.querySelector("#input").blur();
-                  setIsShowPopup(true);
-                }
-              }}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-
-            <div className="rightIcon">
-              <img src="/microphone.png" />
-              <img src="/pic.png" />
-              {/* <img src="/icons/smail.png" /> */}
+            <div className="inputBox">
+              <div className="leftIcon">
+                <img src="/camera.png" />
+              </div>
               <input
-                className=""
-                id="button"
-                type="submit"
-                value="Send"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (message === "") return;
-                  setFindimg(message);
-                  setStatus(1);
-                  handleSend(message);
-                  document.querySelector("#input").focus();
+                id="input"
+                type="text"
+                placeholder={
+                  userId
+                    ? "Please input your message"
+                    : "Please input your id first"
+                }
+                value={message}
+                onFocus={(e) => {
+                  if (!isShowPopupDisplayed) {
+                    document.querySelector("#input").blur();
+                    setIsShowPopup(true);
+                  }
                 }}
+                onChange={(e) => setMessage(e.target.value)}
               />
-            </div>
-          </div>
-        </form>
-      </div>
-      {/* <p>Response: {response}</p> */}
 
-      <div className="alert-tips-box"></div>
-    </div>
+              <div className="rightIcon">
+                <img src="/microphone.png" />
+                <img src="/pic.png" />
+                {/* <img src="/icons/smail.png" /> */}
+                <input
+                  className=""
+                  id="button"
+                  type="submit"
+                  value="Send"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (message === "") return;
+                    setFindimg(message);
+                    setStatus(1);
+                    handleSend(message);
+                    document.querySelector("#input").focus();
+                  }}
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+        {/* <p>Response: {response}</p> */}
+
+        <div className="alert-tips-box"></div>
+      </div>
+    </>
   );
 };
 
 export default App;
-
-
