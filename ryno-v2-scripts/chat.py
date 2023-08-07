@@ -86,7 +86,7 @@ def process_message(user_id, entered_password, message):
             scene = 'scene3'
         res = {"question": question, "choices": choices}
     elif scene == 'scene3':
-        res = scene3(message, user_id, vector)
+        res, next_step = scene3(step)
     else:
         print("Invalid scene")
         return "You are in invalid scene"
