@@ -201,7 +201,7 @@ const App = () => {
         await sendSeparatedMessages();
         setTyping(false);
 
-        if (typeof data.response == "string") {
+        for (const item of responses) {
           const sleep = (time = 1000) => {
             return new Promise((resolve, reject) => {
               setTimeout(() => {
@@ -210,9 +210,13 @@ const App = () => {
             });
           };
 
-          const terminalIndex = terminal.keys.indexOf(data.response);
+          const terminalIndex = item.indexOf(terminal.keys[0]);
+          console.log(terminalIndex, item, terminal.keys[0]);
           if (terminalIndex != -1) {
-            document.querySelector("input#input").setAttribute("disabled", true)
+            document
+              .querySelector("input#input")
+              .setAttribute("disabled", true);
+            document.querySelector("input#input").value = "";
             setIsShowTerminal(() => true);
 
             const addTerminal = async () => {
