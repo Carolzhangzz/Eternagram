@@ -3,6 +3,18 @@ import "./index.css";
 import { useEffect } from "react";
 
 const SystemText = (props) => {
+  const italics = [
+    "Warning !",
+    "Initiating Audition Program…",
+    "Audition Program Result:",
+    "Initiating reboot program…",
+  ];
+  if (italics.includes(props.text))
+    return (
+      <p className="systemText">
+        <span>[SYSTEM]</span> <i>{props.text}</i>
+      </p>
+    );
   return (
     <p className="systemText">
       <span>[SYSTEM]</span> {props.text}

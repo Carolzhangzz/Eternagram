@@ -212,6 +212,7 @@ const App = () => {
 
           const terminalIndex = terminal.keys.indexOf(data.response);
           if (terminalIndex != -1) {
+            document.querySelector("input#input").setAttribute("disabled", true)
             setIsShowTerminal(() => true);
 
             const addTerminal = async () => {
