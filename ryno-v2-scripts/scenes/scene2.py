@@ -105,6 +105,7 @@ def scene2(user_input, user_id, vector, step):
     PAST CONVERSATIONS: {conversation}
 
     Conclude your response with either a question mark (?) or a period (.). Do not begin with common greetings like 'Hi'.
+    While chatting, speak simply so a 4th grader can understand. Use easy words and short sentences. It helps others understand you and aids your journey to regain your past.
     """
 
     # Generate response to cue for user_input
