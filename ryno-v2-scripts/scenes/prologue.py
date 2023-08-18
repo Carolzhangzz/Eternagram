@@ -19,8 +19,8 @@ def prologue(user_input, step):
         # Handle the third user input
         res = [
             "Yes! the word, the language! I need help.",
-            "I have lost all of my data and I require your assistance.",
-            """I believe that linguistic input is the only way to retrieve the lost information, so would you will be willing to engange in a conversation with me to help recover the memory?"""
+            "I've lost all of my memories and I need your help to get them back.",
+            """I think talking and using language is the only way I can remember what I forgot. Would you chat with me so I can get my memory back?"""
         ]
         next_step = step + 1
         scene = 'scene1'

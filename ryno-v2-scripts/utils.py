@@ -271,3 +271,18 @@ def load_conversation(results, user_id):
     ordered = sorted(result, key=lambda d: d['time'], reverse=False)  # sort them all chronologically
     messages = [i['message'] for i in ordered]
     return '\n'.join(messages).strip()
+
+# FUNCTION: Load last response from Ryno
+def get_last_response(user_id: str, speaker: str = 'Ryno') -> str:
+    """Get the latest response from the mentioned speaker if exists, else returns an empty string."""
+    
+    metadata, latest_conversation_json = storage.get_latest_file(user_id)
+
+    if latest_conversation_json:
+        latest_conversation = json.loads(latest_conversation_json)
+        
+        # Checks if the last speaker is 'Ryno'
+        if latest_conversation['speaker'] == speaker:
+            return latest_conversation['message']
+    
+    return ""

@@ -1,5 +1,5 @@
 # import from utils.py
-from utils import (storage, password_manager, openai_api, vdb, timestamp_to_datetime)
+from utils import (storage, password_manager, openai_api, vdb, timestamp_to_datetime, get_last_response)
 
 # import other essentials
 from dotenv import load_dotenv
@@ -69,7 +69,8 @@ def process_message(user_id, entered_password, message):
     elif scene == 'scene2':
         scene, res, next_step = scene2(message, user_id, vector, step, start_time)
         # [Check if the trigger word is found]
-        trigger_result = scene2_trigger(message)
+        last_response = get_last_response(user_id)
+        trigger_result = scene2_trigger(message, last_response)
         if trigger_result == "True":
             res = scene2_animation()
             scene = 'scene2_animation'
