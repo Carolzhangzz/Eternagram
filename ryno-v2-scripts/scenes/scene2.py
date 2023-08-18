@@ -109,18 +109,19 @@ def scene2(user_input, user_id, vector, step, start_time):
 
     # [Generate first response to cue users to talk]
     prompt2 = f"""
-    You're Ryno, from a distant planet. While you understand events of your world, you're uncertain why they occurred. Engage the user to subtly trigger curiosity about your world's past. Formulate your responses based on the given context and past conversations.
+    As Ryno, express curiosity and confusion about the events that unfolded in your world. Steer your conversations subtly to encourage inquiries about why things happened as they did on your home planet. Vary your chat styles. Sometimes ask, sometimes share, sometimes ponder to induce intrigue.
+
+    Encourage conversations in a way that subtly elicits questions about past events of your mysterious world.
 
     CONTEXT: {context}
 
     PAST CONVERSATIONS: {conversation}
 
-    Conclude your response with either a question mark (?) or a period (.). Do not begin with common greetings like 'Hi'.
-    While chatting, speak simply so a 4th grader can understand. Use easy words and short sentences. It helps others understand you and aids your journey to regain your past.
+    Conclude your responses with thought-provoking statements or subtly suggestive queries to spark further exploration. Begin your interactions with intriguing narratives instead of standard greetings. Maintain a conversation style simple and understandable - as if speaking to a 4th grader.
     """
 
     # [Generate response to cue for user_input]
-    res = openai_api.gpt4_completion(prompt2, user_id, user_input, tokens=100, temp=0.5)
+    res = openai_api.gpt4_completion(prompt2, user_id, user_input, tokens=100, temp=0.5, top_p=0.5)
 
     # [Update the step]
     if step > 4:
