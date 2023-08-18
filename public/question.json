@@ -1,60 +1,60 @@
 {
     "question": [
-        "Now that you've learned about our world, It's hard to ignore how different our world has become, isn't it?",
-        "For us, the natives... it's quite a transition. I'm wondering, how does this new  reality make you feel?",
-        "As time goes on, it's becoming quite apparent. Looking ahead, do you think our surroundings will continue to deteriorate at this rate in the next decade?",
-        "Predicting is always hard, isn't it? How do you feel about the kind of world we're leaving for the younger generations? It's quite a heavy thought.",
-        "Many inhabitants on this planet believe the situation is a deadlock. But do you think we as individuals can still shift the tide?",
-        "Considering the ripple effect of our actions, do you ever wonder if we're helpless, or can we still take steps to improve our situation? It's an encouraging thought, that even amidst all this, we can do something to improve the world for future generations.",
-        "Sigh… It can be overwhelming, and one might wonder if individual actions really have an impact on the overall state of things. I mean, when we're talking about people versus our environment...",
-        "But it's a good perspective to keep, acknowledging that collective efforts matter. Do you ever feel like efforts to improve the situation are futile?",
-        "So, do you think it's important to stay informed about the issues affecting our world? We should all have the right to know, after all. How important do you think it is to stay clued up on what's happening around us?"
+        "Now that you've heard about our world, it seems pretty different, huh?",
+        "For all of us who live here, this new world is strange. I'm curious though, how does it make you feel?",
+        "Time sure does fly. Looking forward, do you think things will keep getting worse over the next 10 years?",
+        "Guessing the future is tough. What do you think about the kind of world we're leaving for kids? It's a really big thought.",
+        "Lots of us here think things are stuck and can't change. But do you think we can still make things better?",
+        "Considering how our choices impact everything, do you think we're helpless or can we still do things that help? It would be awesome if we could still make things better for future generations.",
+        "Sigh... It can feel like too much. Do you ever wonder if what we do individually can really make a difference?",
+        "Do you ever feel like it's pointless to try improving our situation, or do you think that our actions as a group can make a real difference?",
+        "So, is it important to keep learning about the things happening in our world? How important do you think it is to stay updated?"
     ],
     "options": [
         [
-            "No kidding, it's a dramatic change for you guys.",
-            "Yeah, it's so-so, I'm not gonna lie.",
-            "It's nothing."
+            "No kidding, it's a big change for you all.",
+            "Yeah, it's kind of interesting, I won't lie.",
+            "It doesn't seem so different to me."
         ],
         [
-            "Yeah, I can't shake off the nerves, to be honest.",
-            "I do have concerns, but I'd be calm if I were in the same situation.",
-            " just taking it as it comes."
+            "Yeah, I won't lie, it's kind of scary.",
+            "I do have some worries, but I'd stay calm if I were in your place.",
+            "Just taking it as it comes."
         ],
         [
-            "Looks like the train's not stopping anytime soon.",
-            "Hard to say, but I'm bracing for more possibilities.",
-            "Noop, I believe the environment will find its own way out just fine."
+            "It sure seems like things aren't slowing down.",
+            "Hard to tell, but I'm ready for whatever happens.",
+            "Nope, I think the earth will heal itself."
         ],
         [
-            "Not gonna lie, if I were you, it would keep me up at night. You guys need to do better.",
-            "It's worrisome, but I will choose to be neutral.",
-            "Nah, they'll navigate their way through."
+            "Honestly, it makes me worried. We all need to do better.",
+            "It does make me a bit nervous, but I'll try not to worry too much.",
+            "Nah, they'll figure out how to handle it."
         ],
         [
-            "Definitely, every little bit helps.",
-            "I'm on the fence, but hopeful that you guys can shift things.",
-            "You people are right, it's a deadlock."
+            "Absolutely, each little thing we do can help.",
+            "I'm not sure, but I'm hopeful we can change things.",
+            "I agree, it seems stuck to me too."
         ],
         [
-            "You bet, I'm set on leaving my mark.",
-            "Not sure, but I'll give it my best shot.",
-            "No way, it’s already too late."
+            "Of course, I want to do something positive.",
+            "I'm not really sure, but I'll give it my best try.",
+            "Nope, it’s already too late."
         ],
         [
-            "No, every drop counts!",
-            "I try not to think that way, but there are moments of doubt.",
-            "It's like fighting a losing battle."
+            "Nope, I believe every small action matters!",
+            "Sometimes I doubt it, but I try not to.",
+            "Sometimes, it feels like it doesn't matter what I do."
         ],
         [
-            "I believe we can move mountains if we keep at it.",
-            "I try not to think that way, but doubt creeps in at times.",
-            "Sometimes, it feels like I'm banging my head against the wall."
+            "I believe we can make big changes if we keep trying.",
+            "Sometimes I have doubts, but I try to stay hopeful.",
+            "Sometimes, it feels like I'm just doing the same thing over and over with no change."
         ],
         [
-            "Very. It is essential to drive change.",
-            "Maybe, but it can also be overwhelming.",
-            "Come on, even if you know everything, what can you do?"
+            "Totally. Knowing the facts is the first step to making changes.",
+            "Sometimes, but too much information can be confusing.",
+            "I mean, even if you know everything, what can you do about it?"
         ]
     ]
 }

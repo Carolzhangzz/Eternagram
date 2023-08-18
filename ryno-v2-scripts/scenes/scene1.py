@@ -4,6 +4,7 @@ from utils import (openai_api, vdb,
 
 # import other essentials
 import openai
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -52,20 +53,27 @@ def scene1_trigger(user_input: str) -> bool:
 
 def scene1_animation():
     res = [
-        "Ah! I do recall that, albeit vaguely.",
-        """It was a place... a wasteland, with cracked earth, and people fleeing the city amidst a great cataclysm. Please, help jog my memory by asking more questions related to this topic"""
+        "Ah! I kind of remember that.",
+        "It was a place... a big empty land, with broken ground. People were running away from the city because something really terrible happened. Please, ask more questions about this, it will help me remember better."
     ]
     return res
 
-def scene1(user_input, user_id, vector, step):
+def scene1(user_input, user_id, vector, step, start_time):
     """Scene 1: Ryno is having memory lost"""
 
-    # Set the defaults
+    # [Set the defaults]
     scene = 'scene1'
     convo_length = 30
     conversation = ""
 
-    # if the user has talk about anything starting from scene1 -> messages stored.
+    # [Check if more than 3 mins have passed in the current scene]
+    elapsed_time = time.time() - start_time 
+    if elapsed_time > 180:
+        scene = 'scene2'  # transition to scene3 if time limit is exceeded
+        res = scene1_animation()  # transition animation to scene3 without an explicit message
+        return scene, res, step  # return immediately, skipping the rest of the function
+
+    # [If the user has talk about anything starting from scene1 -> messages stored.]
     if step > 4:
         # Search for relevant messages, and generate a response
         results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
@@ -73,23 +81,19 @@ def scene1(user_input, user_id, vector, step):
 
     # Prompt 1
     prompt1 = f"""
-    You're Ryno, a character from a far-off planet, who is dealing with a memory loss. You think all previous records of your past are lost and you're trying to restore them with conversation.
-    
-    Though you're somewhat confused, you're also deeply curious about discovering your past. During your talks, let your innate interests show subtly over time. Use prior discussions for reference and context.
+    You're Ryno, a character from a far-off planet, who is dealing with a memory loss. You think all previous records of your past are lost and you're trying to restore them with conversation. You're somewhat confused but equally curious about discovering your past.
+
+    During your talks, let your innate interests show subtly over time, and use prior discussions for context.
     Your earlier conversations: 
     {conversation}
 
-    If conversations don't naturally touch on your origins, steer the talk that way as it might help regain your memory. Each chat you engage in is really a hidden plea for help.
-
-    Instead of using usual greetings such as 'Hi', go for intriguing conversation starters. End your dialogues with insightful remarks or a question that subtly pushes the other person to dig into your past.
-
-    While chatting, speak simply so a 4th grader can understand. Use easy words and short sentences. It helps others understand you and aids your journey to regain your past.
+    Sometimes, steer the conversation towards your origins as it may help you in regaining your memory. Remember, each interaction is a hidden plea for help. Vary your chat styles. Sometimes ask, sometimes share, sometimes ponder. Use simple words and short sentences that even a 4th grader can understand.
     """
 
-    # Generate response
-    res = openai_api.gpt4_completion(prompt1, user_id, user_input, tokens=100, temp=0.5)
+    # [Generate response]
+    res = openai_api.gpt4_completion(prompt1, user_id, user_input, tokens=100, temp=0.4, top_p=0.5)
 
-    # Update the step
+    # [Update the step]
     if step > 4:
         next_step = 5
     else:
