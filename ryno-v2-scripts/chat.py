@@ -54,7 +54,7 @@ def process_message(user_id, entered_password, message):
     if scene == 'prologue':
         scene, res, next_step = prologue(message, step)
     elif scene == 'scene1':
-        scene, res, next_step = scene1(message, user_id, vector, step)
+        scene, res, next_step = scene1(message, user_id, vector, step, start_time)
 
         # [Check if the scene is advanced due to timeout]
         if scene == 'scene2':
@@ -67,7 +67,7 @@ def process_message(user_id, entered_password, message):
             scene = 'scene2'
             start_time = time.time() # reset the start time when moving to the next scene
     elif scene == 'scene2':
-        scene, res, next_step = scene2(message, user_id, vector, step)
+        scene, res, next_step = scene2(message, user_id, vector, step, start_time)
         # [Check if the trigger word is found]
         trigger_result = scene2_trigger(message)
         if trigger_result == "True":
