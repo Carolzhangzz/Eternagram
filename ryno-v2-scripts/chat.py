@@ -89,8 +89,8 @@ def process_message(user_id, entered_password, message):
     if scene in ['scene1', 'scene2'] and start_time is not None:
         elapsed_time = time.time() - start_time 
         print(f"Checking elapsed time for {scene}. Current Time: {time.time()}, Start Time: {start_time}, Elapsed Time: {elapsed_time}")  # Print current time, start time, elapsed time
-        if elapsed_time > 180:
-            print(f"5 minutes passed in {scene}. Transitioning scene.")
+        if elapsed_time > 240:
+            print(f"4 minutes passed in {scene}. Transitioning scene.")
             if scene == 'scene1':
                 scene = 'scene2'
                 res = scene1_animation()  # replace with appropriate method to transition from scene1 to scene2
@@ -128,7 +128,10 @@ def process_message(user_id, entered_password, message):
                     step = next_step
     else:
         # [If scene is not either 'scene1' or 'scene2', follow the usual flow.]
-        scene, res, next_step = manage_scenes(scene, message, user_id, vector, step)
+        if scene != 'scene3':
+            scene, res, next_step = manage_scenes(scene, message, user_id, vector, step)
+        else:
+            res, next_step = manage_scenes(scene, message, user_id, vector, step)
 
     # [Update the next step and scene]
     step = next_step
