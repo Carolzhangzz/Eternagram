@@ -131,6 +131,41 @@ class CloudStorage:
         else:
             print(f"No files found for user: {user_id}")
             return None, None
+        
+    # FUNCTION: to get all the user ids
+    def get_all_users(self):
+        # Get all blobs in the bucket
+        blobs = self.bucket.list_blobs(prefix='path/to/nexus/')
+
+        # Extract user directories
+        users = set()
+        for blob in blobs:
+            # Split the blob name by '/' to get the directory structure
+            parts = blob.name.split('/')
+            if len(parts) > 3:
+                # The user_id is the fourth part of the blob name
+                users.add(parts[3])
+
+        return list(users)
+
+    # FUNCTION: get all files for user
+    def get_all_files_for_user(self, user_id):
+        # Get the list of all blobs in the specified user_id directory
+        blobs = self.bucket.list_blobs(prefix=f'path/to/nexus/{user_id}')
+
+        # Initialize list to store all file data
+        all_files_data = []
+
+        for blob in blobs:
+            # Discard any directories (as they have no 'updated' attribute)
+            if not blob.name.endswith("/"):
+                # To download the blob as string
+                json_string = blob.download_as_text()
+
+                # Convert the JSON string to a Python dictionary and append it to the list
+                all_files_data.append(json.loads(json_string))
+
+        return all_files_data
 
 # Class to use embeddings and completions
 class OpenAI:

@@ -92,13 +92,11 @@ def scene2(user_input, user_id, vector, step):
     context = ""
     conversation = ""
 
-    # [If the user has talk about anything starting from scene1 -> messages stored.]
-    if step >= 4:
-        # Search for relevant messages, and generate a response
-        results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
-        conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
-        docs = docsearch.similarity_search(user_input, k=3)
-        context = ' '.join(doc.page_content for doc in docs)
+    # Search for relevant messages, and generate a response
+    results = vdb.query(vector=vector, top_k=convo_length, filter={"user_id":{"$eq":user_id}}, include_metadata=True)
+    conversation = load_conversation(results, user_id)  # results should be a DICT with 'matches' which is a LIST of DICTS, with 'id'
+    docs = docsearch.similarity_search(user_input, k=3)
+    context = ' '.join(doc.page_content for doc in docs)
 
     # [Generate first response to cue users to talk]
     prompt2 = f"""

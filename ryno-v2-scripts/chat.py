@@ -152,7 +152,7 @@ def process_message(user_id, entered_password, message):
             print("Key 'question' not found in dictionary 'res'")
             res_vector = "None"  # You'll need to set a suitable default value
     else:
-        res_vector = message
+        res_vector = res
 
     # [Save Ryno's response, vectorize, save, etc]
     timestamp = time.time()
