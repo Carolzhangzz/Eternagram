@@ -1,4 +1,4 @@
-# Eternagram (Ryno-V2)
+# Eternagram (Ryno)
 This is the project repository to put the ReactJS web interface and API related codes
 
 ## Requirements:
