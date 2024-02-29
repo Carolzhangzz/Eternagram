@@ -1,9 +1,13 @@
+
 # Eternagram (Ryno)
-<strong>ETERNAGRAM</strong> is a `text-based adventure game`,as players slowly begin to unravel the stories in the distant world by conversing with Ryno through Eternagram, they discover ways to move around in the world by telling Ryno, and learn about the mysteries of the world.
+<strong>ETERNAGRAM</strong> is a `text-based adventure game`,as players slowly begin to unravel the stories in the distant world by conversing with Ryno through Eternagram, they discover ways to move around in the world by telling Ryno, and learn about the mysteries of the world.<br>
 
-This is the project repository to put the ReactJS web interface and API related codes
+`The game is published now!` [Game URL](https://eternagram.xyz/)
 
+
+This is the project repository to put the ReactJS web interface and API related codes.
 ## Requirements:
+
 - Install Visual Studio Code or other editors.
 - Install Node.js (through homebrew or download from http://nodejs.org/). If you want to install through homebrew, you need to download the homebrew.
 - Install npm (through https://www.npmjs.com/get-npm).
