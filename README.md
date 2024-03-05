@@ -2,8 +2,6 @@
 # Eternagram (Ryno)
 <strong>ETERNAGRAM</strong> is a `text-based adventure game`,as players slowly begin to unravel the stories in the distant world by conversing with Ryno through Eternagram, they discover ways to move around in the world by telling Ryno, and learn about the mysteries of the world.<br>
 
-`The game is published now!` [Game URL](https://eternagram.xyz/)
-
 
 This is the project repository to put the ReactJS web interface and API related codes.
 ## Requirements:
